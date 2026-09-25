@@ -16,6 +16,7 @@ def greet(name: str, count: int = 1) -> None:
 def bye(name: str) -> None:
     typer.echo(f"Goodbye, {name}.")
 
+
 class Recipe:
     def __init__(
         self,
@@ -32,6 +33,7 @@ class Recipe:
         self.calories = calories
         self.steps = steps
         self.oven_temperature = oven_temperature
+
 
 pasta = Recipe(
     name="Pasta with Tomato",
@@ -163,6 +165,7 @@ def show() -> None:
         if recipe.oven_temperature is not None:
             typer.echo(f"Oven temperature: {recipe.oven_temperature}°C")
 
+
 @app.command()
 def filter_meals() -> None:
     """Filter meals by ingredient, cooking time or calories."""
@@ -214,11 +217,7 @@ def filter_meals() -> None:
         typer.echo("\nRECIPES FOUND:")
 
         for recipe in found_recipes:
-            typer.echo(
-                f"- {recipe.name} "
-                f"({recipe.cooking_time} min, "
-                f"{recipe.calories} calories)"
-            )
+            typer.echo(f"- {recipe.name} ({recipe.cooking_time} min, {recipe.calories} calories)")
 
 
 if __name__ == "__main__":
