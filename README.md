@@ -20,30 +20,90 @@ and CI resolve the same ones. When you change a dependency in `pyproject.toml`, 
 
 ## Run
 
-```
-uv run app --help
-uv run app greet World
-uv run app greet World --count 3
+# Meal Planner
+
+Meal Planner is a command-line application that allows users to view available meals and filter them based on different preferences such as ingredients, cooking time, and calories.
+
+It is designed for users who want a simple way to explore meal options and decide what they could cook.
+
+## Install
+
+```bash
+uv sync
 ```
 
-## Develop
+This creates a virtual environment and installs everything, including the development tools, from `uv.lock`.
 
-```
-uv run ruff check .          # lint
-uv run ruff format .         # format (CI runs `--check` and fails on a diff)
-uv run mypy src tests        # types
-uv run pytest                # tests
+When you change a dependency in `pyproject.toml`, run:
+
+```bash
+uv lock
 ```
 
-These four commands are exactly what `.github/workflows/check.yml` runs on every push.
-If they pass here, CI passes.
+and commit the updated `uv.lock`.
 
-## Layout
+## Run
 
+To see the available commands:
+
+```bash
+uv run meal-planner --help
 ```
-src/app/          your package — importable, installable, not just a script
-  cli.py          the typer command-line interface
-  __main__.py     lets `python -m app` work
-tests/            pytest tests, mirroring src/
-pyproject.toml    dependencies and tool configuration — the single source of truth
+
+To view all meals:
+
+```bash
+uv run meal-planner show
 ```
+
+To filter meals:
+
+```bash
+uv run meal-planner filter-meals
+```
+
+The filtering option allows users to search meals by ingredient, cooking time, or calories.
+
+## Tests
+
+To run the tests:
+
+```bash
+uv run pytest
+```
+
+The tests check that the main features of the application work correctly.
+
+## Development checks
+
+Before pushing changes, run:
+
+```bash
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src tests
+uv run pytest
+```
+
+These checks verify the code style, formatting, types, and tests.
+
+## Project structure
+
+```text
+src/meal_planner/
+    cli.py
+    __main__.py
+
+tests/
+    test_cli.py
+
+pyproject.toml
+uv.lock
+README.md
+```
+
+- `cli.py` contains the Meal Planner commands and recipes.
+- `__main__.py` starts the application.
+- `tests/` contains the tests.
+- `pyproject.toml` contains the project configuration and dependencies.
+- `uv.lock` stores the exact dependency versions.

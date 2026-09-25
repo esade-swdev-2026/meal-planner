@@ -1,28 +1,25 @@
 from typer.testing import CliRunner
 
-from app.cli import app
+from meal_planner.cli import app
 
 runner = CliRunner()
 
 
-def test_greet_says_hello() -> None:
-    result = runner.invoke(app, ["greet", "Ada"])
+def test_show() -> None:
+    result = runner.invoke(app, ["show"])
+
     assert result.exit_code == 0
-    assert "Hello, Ada!" in result.stdout
+    assert "Pasta with Tomato" in result.stdout
+    assert "Avocado Toast" in result.stdout
+    assert "Calories" in result.stdout
 
 
-def test_greet_repeats_with_count() -> None:
-    result = runner.invoke(app, ["greet", "Ada", "--count", "3"])
+def test_filter_by_ingredient() -> None:
+    result = runner.invoke(
+        app,
+        ["filter-meals"],
+        input="1\navocado\n",
+    )
+
     assert result.exit_code == 0
-    assert result.stdout.count("Hello, Ada!") == 3
-
-
-def test_greet_rejects_bad_count() -> None:
-    result = runner.invoke(app, ["greet", "Ada", "--count", "0"])
-    assert result.exit_code == 1
-
-
-def test_bye_says_goodbye() -> None:
-    result = runner.invoke(app, ["bye", "Ada"])
-    assert result.exit_code == 0
-    assert "Goodbye, Ada." in result.stdout
+    assert "Avocado Toast" in result.stdout

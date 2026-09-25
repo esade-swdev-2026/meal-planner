@@ -1,6 +1,6 @@
 import typer
 
-app = typer.Typer(help="Replace this with your project's command-line interface.")
+app = typer.Typer(help="Meal planner command-line application.")
 
 
 @app.command()
@@ -32,7 +32,6 @@ class Recipe:
         self.calories = calories
         self.steps = steps
         self.oven_temperature = oven_temperature
-
 
 pasta = Recipe(
     name="Pasta with Tomato",
@@ -163,6 +162,63 @@ def show() -> None:
 
         if recipe.oven_temperature is not None:
             typer.echo(f"Oven temperature: {recipe.oven_temperature}°C")
+
+@app.command()
+def filter_meals() -> None:
+    """Filter meals by ingredient, cooking time or calories."""
+
+    typer.echo("\nFILTER MEALS")
+    typer.echo("1. Filter by ingredient")
+    typer.echo("2. Filter by cooking time")
+    typer.echo("3. Filter by calories")
+
+    option = typer.prompt("Choose an option")
+
+    found_recipes = []
+
+    if option == "1":
+        ingredient = typer.prompt("Enter an ingredient").lower()
+
+        for recipe in recipes:
+            if ingredient in recipe.ingredients:
+                found_recipes.append(recipe)
+
+    elif option == "2":
+        max_time = typer.prompt(
+            "Maximum cooking time in minutes",
+            type=int,
+        )
+
+        for recipe in recipes:
+            if recipe.cooking_time <= max_time:
+                found_recipes.append(recipe)
+
+    elif option == "3":
+        max_calories = typer.prompt(
+            "Maximum calories",
+            type=int,
+        )
+
+        for recipe in recipes:
+            if recipe.calories <= max_calories:
+                found_recipes.append(recipe)
+
+    else:
+        typer.echo("Invalid option.")
+        return
+
+    if len(found_recipes) == 0:
+        typer.echo("No recipes found.")
+
+    else:
+        typer.echo("\nRECIPES FOUND:")
+
+        for recipe in found_recipes:
+            typer.echo(
+                f"- {recipe.name} "
+                f"({recipe.cooking_time} min, "
+                f"{recipe.calories} calories)"
+            )
 
 
 if __name__ == "__main__":
