@@ -21,10 +21,10 @@ class Recipe:
     def __init__(
         self,
         name: str,
-        ingredients: dict,
+        ingredients: dict[str, str],
         cooking_time: int,
         calories: int,
-        steps: list,
+        steps: list[str],
         oven_temperature: int | None = None,
     ) -> None:
         self.name = name
