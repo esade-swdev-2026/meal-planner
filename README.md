@@ -107,3 +107,11 @@ README.md
 - `tests/` contains the tests.
 - `pyproject.toml` contains the project configuration and dependencies.
 - `uv.lock` stores the exact dependency versions.
+
+## I/O locations
+
+In `src/meal_planner/cli.py`:
+- `greet`: uses `typer.echo` and raises `typer.Exit`.
+- `bye`: uses `typer.echo`.
+- `show`: uses `typer.echo`.
+- `filter_meals`: uses `typer.prompt` and `typer.echo`.
