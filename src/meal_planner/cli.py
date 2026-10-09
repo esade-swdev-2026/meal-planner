@@ -148,6 +148,45 @@ recipes = [
 ]
 
 
+def filter_by_ingredient(
+    recipes: list[Recipe],
+    ingredient: str,
+) -> list[Recipe]:
+    matching_recipes: list[Recipe] = []
+
+    for recipe in recipes:
+        if ingredient.lower() in recipe.ingredients:
+            matching_recipes.append(recipe)
+
+    return matching_recipes
+
+
+def filter_by_time(
+    recipes: list[Recipe],
+    maximum: int,
+) -> list[Recipe]:
+    matching_recipes: list[Recipe] = []
+
+    for recipe in recipes:
+        if recipe.cooking_time <= maximum:
+            matching_recipes.append(recipe)
+
+    return matching_recipes
+
+
+def filter_by_calories(
+    recipes: list[Recipe],
+    maximum: int,
+) -> list[Recipe]:
+    matching_recipes: list[Recipe] = []
+
+    for recipe in recipes:
+        if recipe.calories <= maximum:
+            matching_recipes.append(recipe)
+
+    return matching_recipes
+
+
 @app.command()
 def show() -> None:
     """Show all available meals."""
@@ -177,42 +216,30 @@ def filter_meals() -> None:
 
     option = typer.prompt("Choose an option")
 
-    found_recipes = []
-
     if option == "1":
-        ingredient = typer.prompt("Enter an ingredient").lower()
-
-        for recipe in recipes:
-            if ingredient in recipe.ingredients:
-                found_recipes.append(recipe)
+        ingredient = typer.prompt("Enter an ingredient")
+        found_recipes = filter_by_ingredient(recipes, ingredient)
 
     elif option == "2":
         max_time = typer.prompt(
             "Maximum cooking time in minutes",
             type=int,
         )
-
-        for recipe in recipes:
-            if recipe.cooking_time <= max_time:
-                found_recipes.append(recipe)
+        found_recipes = filter_by_time(recipes, max_time)
 
     elif option == "3":
         max_calories = typer.prompt(
             "Maximum calories",
             type=int,
         )
-
-        for recipe in recipes:
-            if recipe.calories <= max_calories:
-                found_recipes.append(recipe)
+        found_recipes = filter_by_calories(recipes, max_calories)
 
     else:
         typer.echo("Invalid option.")
         return
 
-    if len(found_recipes) == 0:
+    if not found_recipes:
         typer.echo("No recipes found.")
-
     else:
         typer.echo("\nRECIPES FOUND:")
 
