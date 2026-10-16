@@ -8,6 +8,13 @@ from meal_planner.logic import (
     filter_by_time,
 )
 from meal_planner.recipes import Recipe, add_recipe, load_recipes
+from meal_planner.weekly_planner import (
+    ask_daily_options,
+    ask_positive_integer,
+    create_weekly_plan,
+    display_weekly_plan,
+    edit_weekly_plan,
+)
 
 app = typer.Typer(help="Meal planner command-line application.")
 
@@ -130,6 +137,42 @@ def add_recipe_command() -> None:
         raise typer.Exit(code=1) from error
 
     typer.echo(f"'{name}' was added to your recipes.")
+
+
+@app.command()
+def weekly_plan() -> None:
+    """Create a weekly plan and optionally replace meals."""
+
+    typer.echo("\nCREATE YOUR WEEKLY PLAN")
+    typer.echo("We will plan one meal per day.")
+    typer.echo("The calorie maximum applies to each planned meal.")
+
+    try:
+        # Reads recipes.json and returns a list[Recipe]. Missing file -> OSError,
+        # broken JSON -> ValueError, a recipe with missing fields -> TypeError.
+        available_recipes = load_recipes()
+
+        if not available_recipes:
+            raise ValueError("No recipes are available.")
+
+        maximum_calories = ask_positive_integer("Maximum calories per planned meal")
+
+        daily_options = ask_daily_options(
+            available_recipes,
+            maximum_calories,
+        )
+
+        plan = create_weekly_plan(daily_options)
+        display_weekly_plan(plan)
+
+        plan = edit_weekly_plan(plan, daily_options)
+
+    except (ValueError, OSError, TypeError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(code=1) from error
+
+    typer.echo("\nYOUR FINAL PLAN")
+    display_weekly_plan(plan)
 
 
 if __name__ == "__main__":
