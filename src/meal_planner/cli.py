@@ -1,4 +1,13 @@
+"""Typer commands and general CLI behaviour."""
+
 import typer
+
+from meal_planner.logic import (
+    filter_by_calories,
+    filter_by_ingredient,
+    filter_by_time,
+)
+from meal_planner.recipes import Recipe, add_recipe, load_recipes
 
 app = typer.Typer(help="Meal planner command-line application.")
 
@@ -17,179 +26,10 @@ def bye(name: str) -> None:
     typer.echo(f"Goodbye, {name}.")
 
 
-class Recipe:
-    def __init__(
-        self,
-        name: str,
-        ingredients: dict[str, str],
-        cooking_time: int,
-        calories: int,
-        steps: list[str],
-        oven_temperature: int | None = None,
-    ) -> None:
-        self.name = name
-        self.ingredients = ingredients
-        self.cooking_time = cooking_time
-        self.calories = calories
-        self.steps = steps
-        self.oven_temperature = oven_temperature
-
-
-pasta = Recipe(
-    name="Pasta with Tomato",
-    ingredients={
-        "pasta": "200 g",
-        "tomato sauce": "150 g",
-        "parmesan": "40 g",
-        "olive oil": "10 ml",
-        "salt": "2 g",
-    },
-    cooking_time=20,
-    calories=650,
-    steps=[
-        "Boil the pasta",
-        "Heat the tomato sauce",
-        "Mix the pasta with the sauce",
-        "Add parmesan",
-    ],
-)
-
-
-filet_mignon = Recipe(
-    name="Filet Mignon",
-    ingredients={
-        "beef fillet": "200 g",
-        "butter": "20 g",
-        "garlic": "1 clove",
-        "salt": "2 g",
-        "pepper": "1 g",
-    },
-    cooking_time=20,
-    calories=500,
-    steps=[
-        "Season the beef with salt and pepper",
-        "Heat a pan",
-        "Cook the beef on both sides",
-        "Add butter and garlic",
-        "Let the meat rest before serving",
-    ],
-)
-
-
-sole = Recipe(
-    name="Sole",
-    ingredients={
-        "sole": "250 g",
-        "lemon": "1",
-        "butter": "15 g",
-        "parsley": "5 g",
-        "salt": "2 g",
-    },
-    cooking_time=15,
-    calories=300,
-    steps=[
-        "Season the sole",
-        "Heat butter in a pan",
-        "Cook the fish on both sides",
-        "Add lemon and parsley",
-    ],
-)
-
-
-cheesecake = Recipe(
-    name="Cheesecake",
-    ingredients={
-        "cream cheese": "250 g",
-        "biscuits": "100 g",
-        "butter": "50 g",
-        "sugar": "80 g",
-        "eggs": "2",
-    },
-    cooking_time=50,
-    calories=700,
-    steps=[
-        "Crush the biscuits",
-        "Mix the biscuits with melted butter",
-        "Mix cream cheese, sugar and eggs",
-        "Pour the mixture over the biscuit base",
-        "Bake the cheesecake",
-    ],
-    oven_temperature=180,
-)
-
-
-avocado_toast = Recipe(
-    name="Avocado Toast",
-    ingredients={
-        "bread": "2 slices",
-        "avocado": "1",
-        "egg": "1",
-        "salt": "1 g",
-        "pepper": "1 g",
-    },
-    cooking_time=10,
-    calories=400,
-    steps=[
-        "Toast the bread",
-        "Mash the avocado",
-        "Spread the avocado on the toast",
-        "Cook the egg",
-        "Place the egg on top",
-    ],
-)
-
-
-recipes = [
-    pasta,
-    filet_mignon,
-    sole,
-    cheesecake,
-    avocado_toast,
-]
-
-
-def filter_by_ingredient(
-    recipes: list[Recipe],
-    ingredient: str,
-) -> list[Recipe]:
-    matching_recipes: list[Recipe] = []
-
-    for recipe in recipes:
-        if ingredient.lower() in recipe.ingredients:
-            matching_recipes.append(recipe)
-
-    return matching_recipes
-
-
-def filter_by_time(
-    recipes: list[Recipe],
-    maximum: int,
-) -> list[Recipe]:
-    matching_recipes: list[Recipe] = []
-
-    for recipe in recipes:
-        if recipe.cooking_time <= maximum:
-            matching_recipes.append(recipe)
-
-    return matching_recipes
-
-
-def filter_by_calories(
-    recipes: list[Recipe],
-    maximum: int,
-) -> list[Recipe]:
-    matching_recipes: list[Recipe] = []
-
-    for recipe in recipes:
-        if recipe.calories <= maximum:
-            matching_recipes.append(recipe)
-
-    return matching_recipes
-
-
 @app.command()
 def show() -> None:
     """Show all available meals."""
+    recipes = load_recipes()
 
     for recipe in recipes:
         typer.echo(f"\n{recipe.name}")
@@ -208,6 +48,7 @@ def show() -> None:
 @app.command()
 def filter_meals() -> None:
     """Filter meals by ingredient, cooking time or calories."""
+    recipes = load_recipes()
 
     typer.echo("\nFILTER MEALS")
     typer.echo("1. Filter by ingredient")
@@ -245,6 +86,50 @@ def filter_meals() -> None:
 
         for recipe in found_recipes:
             typer.echo(f"- {recipe.name} ({recipe.cooking_time} min, {recipe.calories} calories)")
+
+
+@app.command("add-recipe")
+def add_recipe_command() -> None:
+    """Add a new recipe and save it to the JSON file."""
+    typer.echo("\nADD A NEW RECIPE")
+    name = typer.prompt("Recipe name")
+
+    typer.echo("Enter the ingredients. Leave the name empty to finish.")
+    ingredients: dict[str, str] = {}
+    while True:
+        ingredient = typer.prompt("Ingredient", default="", show_default=False).strip().lower()
+        if ingredient == "":
+            break
+        quantity = typer.prompt(f"Quantity of {ingredient} (e.g. 200 g)")
+        ingredients[ingredient] = quantity
+
+    cooking_time = typer.prompt("Cooking time in minutes", type=int)
+    calories = typer.prompt("Calories", type=int)
+
+    typer.echo("Enter the steps. Leave the step empty to finish.")
+    steps: list[str] = []
+    while True:
+        step = typer.prompt(f"Step {len(steps) + 1}", default="", show_default=False).strip()
+        if step == "":
+            break
+        steps.append(step)
+
+    oven = typer.prompt("Oven temperature in °C (0 if no oven)", type=int, default=0)
+    oven_temperature = oven if oven > 0 else None
+
+    if len(ingredients) == 0 or len(steps) == 0:
+        typer.echo("A recipe needs at least one ingredient and one step.", err=True)
+        raise typer.Exit(code=1)
+
+    recipe = Recipe(name, ingredients, cooking_time, calories, steps, oven_temperature)
+
+    try:
+        add_recipe(recipe)
+    except ValueError as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(code=1) from error
+
+    typer.echo(f"'{name}' was added to your recipes.")
 
 
 if __name__ == "__main__":
