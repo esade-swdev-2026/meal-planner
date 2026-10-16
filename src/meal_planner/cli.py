@@ -1,42 +1,46 @@
-"""Typer commands and general CLI behaviour."""
+from typing import NoReturn
 
 import typer
 
 from meal_planner.logic import (
+    create_recipe,
     filter_by_calories,
     filter_by_ingredient,
     filter_by_time,
 )
-from meal_planner.recipes import Recipe, add_recipe, load_recipes
-from meal_planner.weekly_planner import (
+from meal_planner.prompts import (
     ask_daily_options,
+    ask_ingredients,
+    ask_oven_temperature,
     ask_positive_integer,
-    create_weekly_plan,
+    ask_steps,
     display_weekly_plan,
     edit_weekly_plan,
 )
+from meal_planner.recipes import Recipe, add_recipe, load_recipes
+from meal_planner.weekly_planner import create_weekly_plan
 
 app = typer.Typer(help="Meal planner command-line application.")
 
 
-@app.command()
-def greet(name: str, count: int = 1) -> None:
-    if count < 1:
-        typer.echo("count must be at least 1", err=True)
-        raise typer.Exit(code=1)
-    for _ in range(count):
-        typer.echo(f"Hello, {name}!")
+def exit_with_error(message: str) -> NoReturn:
+    typer.echo(f"Error: {message}", err=True)
+    raise typer.Exit(code=1)
 
 
-@app.command()
-def bye(name: str) -> None:
-    typer.echo(f"Goodbye, {name}.")
+def load_recipes_or_exit() -> list[Recipe]:
+    try:
+        return load_recipes()
+    except OSError as error:
+        exit_with_error(f"could not open the recipes file ({error.strerror}).")
+    except ValueError as error:
+        exit_with_error(f"the recipes file is not valid. {error}")
 
 
 @app.command()
 def show() -> None:
     """Show all available meals."""
-    recipes = load_recipes()
+    recipes = load_recipes_or_exit()
 
     for recipe in recipes:
         typer.echo(f"\n{recipe.name}")
@@ -55,7 +59,7 @@ def show() -> None:
 @app.command()
 def filter_meals() -> None:
     """Filter meals by ingredient, cooking time or calories."""
-    recipes = load_recipes()
+    recipes = load_recipes_or_exit()
 
     typer.echo("\nFILTER MEALS")
     typer.echo("1. Filter by ingredient")
@@ -69,22 +73,15 @@ def filter_meals() -> None:
         found_recipes = filter_by_ingredient(recipes, ingredient)
 
     elif option == "2":
-        max_time = typer.prompt(
-            "Maximum cooking time in minutes",
-            type=int,
-        )
+        max_time = ask_positive_integer("Maximum cooking time in minutes")
         found_recipes = filter_by_time(recipes, max_time)
 
     elif option == "3":
-        max_calories = typer.prompt(
-            "Maximum calories",
-            type=int,
-        )
+        max_calories = ask_positive_integer("Maximum calories")
         found_recipes = filter_by_calories(recipes, max_calories)
 
     else:
-        typer.echo("Invalid option.")
-        return
+        exit_with_error(f"'{option}' is not a valid option. Choose 1, 2 or 3.")
 
     if not found_recipes:
         typer.echo("No recipes found.")
@@ -100,76 +97,53 @@ def add_recipe_command() -> None:
     """Add a new recipe and save it to the JSON file."""
     typer.echo("\nADD A NEW RECIPE")
     name = typer.prompt("Recipe name")
-
-    typer.echo("Enter the ingredients. Leave the name empty to finish.")
-    ingredients: dict[str, str] = {}
-    while True:
-        ingredient = typer.prompt("Ingredient", default="", show_default=False).strip().lower()
-        if ingredient == "":
-            break
-        quantity = typer.prompt(f"Quantity of {ingredient} (e.g. 200 g)")
-        ingredients[ingredient] = quantity
-
-    cooking_time = typer.prompt("Cooking time in minutes", type=int)
-    calories = typer.prompt("Calories", type=int)
-
-    typer.echo("Enter the steps. Leave the step empty to finish.")
-    steps: list[str] = []
-    while True:
-        step = typer.prompt(f"Step {len(steps) + 1}", default="", show_default=False).strip()
-        if step == "":
-            break
-        steps.append(step)
-
-    oven = typer.prompt("Oven temperature in °C (0 if no oven)", type=int, default=0)
-    oven_temperature = oven if oven > 0 else None
-
-    if len(ingredients) == 0 or len(steps) == 0:
-        typer.echo("A recipe needs at least one ingredient and one step.", err=True)
-        raise typer.Exit(code=1)
-
-    recipe = Recipe(name, ingredients, cooking_time, calories, steps, oven_temperature)
+    ingredients = ask_ingredients()
+    cooking_time = int(typer.prompt("Cooking time in minutes", type=int))
+    calories = int(typer.prompt("Calories", type=int))
+    steps = ask_steps()
+    oven_temperature = ask_oven_temperature()
 
     try:
+        recipe = create_recipe(
+            name,
+            ingredients,
+            cooking_time,
+            calories,
+            steps,
+            oven_temperature,
+        )
         add_recipe(recipe)
     except ValueError as error:
-        typer.echo(str(error), err=True)
-        raise typer.Exit(code=1) from error
+        exit_with_error(str(error))
+    except OSError as error:
+        exit_with_error(f"could not save the recipe ({error.strerror}).")
 
-    typer.echo(f"'{name}' was added to your recipes.")
+    typer.echo(f"'{recipe.name}' was added to your recipes.")
 
 
 @app.command()
 def weekly_plan() -> None:
     """Create a weekly plan and optionally replace meals."""
+    available_recipes = load_recipes_or_exit()
 
     typer.echo("\nCREATE YOUR WEEKLY PLAN")
     typer.echo("We will plan one meal per day.")
     typer.echo("The calorie maximum applies to each planned meal.")
 
     try:
-        # Reads recipes.json and returns a list[Recipe]. Missing file -> OSError,
-        # broken JSON -> ValueError, a recipe with missing fields -> TypeError.
-        available_recipes = load_recipes()
-
         if not available_recipes:
             raise ValueError("No recipes are available.")
 
         maximum_calories = ask_positive_integer("Maximum calories per planned meal")
-
-        daily_options = ask_daily_options(
-            available_recipes,
-            maximum_calories,
-        )
+        daily_options = ask_daily_options(available_recipes, maximum_calories)
 
         plan = create_weekly_plan(daily_options)
         display_weekly_plan(plan)
 
         plan = edit_weekly_plan(plan, daily_options)
 
-    except (ValueError, OSError, TypeError) as error:
-        typer.echo(str(error), err=True)
-        raise typer.Exit(code=1) from error
+    except ValueError as error:
+        exit_with_error(str(error))
 
     typer.echo("\nYOUR FINAL PLAN")
     display_weekly_plan(plan)
