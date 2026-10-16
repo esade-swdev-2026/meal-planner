@@ -95,7 +95,7 @@ def add_recipe_command() -> None:
     name = typer.prompt("Recipe name")
 
     typer.echo("Enter the ingredients. Leave the name empty to finish.")
-    ingredients = {}
+    ingredients: dict[str, str] = {}
     while True:
         ingredient = typer.prompt("Ingredient", default="", show_default=False).strip().lower()
         if ingredient == "":
@@ -107,7 +107,7 @@ def add_recipe_command() -> None:
     calories = typer.prompt("Calories", type=int)
 
     typer.echo("Enter the steps. Leave the step empty to finish.")
-    steps = []
+    steps: list[str] = []
     while True:
         step = typer.prompt(f"Step {len(steps) + 1}", default="", show_default=False).strip()
         if step == "":
@@ -127,7 +127,7 @@ def add_recipe_command() -> None:
         add_recipe(recipe)
     except ValueError as error:
         typer.echo(str(error), err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from error
 
     typer.echo(f"'{name}' was added to your recipes.")
 
