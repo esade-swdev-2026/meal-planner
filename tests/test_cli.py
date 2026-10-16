@@ -1,13 +1,13 @@
 import pytest
 from typer.testing import CliRunner
 
-from meal_planner.cli import (
-    Recipe,
-    app,
+from meal_planner.cli import app
+from meal_planner.logic import (
     filter_by_calories,
     filter_by_ingredient,
     filter_by_time,
 )
+from meal_planner.recipes import Recipe
 
 runner = CliRunner()
 
