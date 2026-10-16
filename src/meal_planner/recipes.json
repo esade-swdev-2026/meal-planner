@@ -1,0 +1,503 @@
+[
+    {
+        "name": "Pasta with Tomato",
+        "ingredients": {
+            "pasta": "200 g",
+            "tomato sauce": "150 g",
+            "parmesan": "40 g",
+            "olive oil": "10 ml",
+            "salt": "2 g"
+        },
+        "cooking_time": 20,
+        "calories": 650,
+        "steps": [
+            "Boil the pasta",
+            "Heat the tomato sauce",
+            "Mix the pasta with the sauce",
+            "Add parmesan"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Filet Mignon",
+        "ingredients": {
+            "beef fillet": "200 g",
+            "butter": "20 g",
+            "garlic": "1 clove",
+            "salt": "2 g",
+            "pepper": "1 g"
+        },
+        "cooking_time": 20,
+        "calories": 500,
+        "steps": [
+            "Season the beef with salt and pepper",
+            "Heat a pan",
+            "Cook the beef on both sides",
+            "Add butter and garlic",
+            "Let the meat rest before serving"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Sole",
+        "ingredients": {
+            "sole": "250 g",
+            "lemon": "1",
+            "butter": "15 g",
+            "parsley": "5 g",
+            "salt": "2 g"
+        },
+        "cooking_time": 15,
+        "calories": 300,
+        "steps": [
+            "Season the sole",
+            "Heat butter in a pan",
+            "Cook the fish on both sides",
+            "Add lemon and parsley"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Cheesecake",
+        "ingredients": {
+            "cream cheese": "250 g",
+            "biscuits": "100 g",
+            "butter": "50 g",
+            "sugar": "80 g",
+            "eggs": "2"
+        },
+        "cooking_time": 50,
+        "calories": 700,
+        "steps": [
+            "Crush the biscuits",
+            "Mix the biscuits with melted butter",
+            "Mix cream cheese, sugar and eggs",
+            "Pour the mixture over the biscuit base",
+            "Bake the cheesecake"
+        ],
+        "oven_temperature": 180
+    },
+    {
+        "name": "Avocado Toast",
+        "ingredients": {
+            "bread": "2 slices",
+            "avocado": "1",
+            "salt": "1 g",
+            "pepper": "1 g",
+            "eggs": "1"
+        },
+        "cooking_time": 10,
+        "calories": 400,
+        "steps": [
+            "Toast the bread",
+            "Mash the avocado",
+            "Spread the avocado on the toast",
+            "Cook the egg",
+            "Place the egg on top"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Spanish Omelette",
+        "ingredients": {
+            "potatoes": "400 g",
+            "eggs": "4",
+            "onion": "1",
+            "olive oil": "60 ml",
+            "salt": "3 g"
+        },
+        "cooking_time": 35,
+        "calories": 450,
+        "steps": [
+            "Peel and slice the potatoes and onion",
+            "Fry them slowly in olive oil until soft",
+            "Beat the eggs with salt",
+            "Mix the potatoes with the eggs",
+            "Cook in a pan and flip to cook the other side"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Gazpacho",
+        "ingredients": {
+            "tomatoes": "500 g",
+            "cucumber": "1",
+            "green pepper": "1",
+            "garlic": "1 clove",
+            "olive oil": "30 ml",
+            "vinegar": "10 ml",
+            "salt": "2 g"
+        },
+        "cooking_time": 15,
+        "calories": 200,
+        "steps": [
+            "Chop all the vegetables",
+            "Blend everything with the oil, vinegar and salt",
+            "Chill in the fridge before serving"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Pan con Tomate",
+        "ingredients": {
+            "bread": "2 slices",
+            "tomatoes": "1",
+            "garlic": "1 clove",
+            "olive oil": "10 ml",
+            "salt": "1 g"
+        },
+        "cooking_time": 5,
+        "calories": 250,
+        "steps": [
+            "Toast the bread",
+            "Rub the garlic on the toast",
+            "Rub or grate the tomato over the bread",
+            "Add olive oil and salt"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Garlic Prawns",
+        "ingredients": {
+            "prawns": "200 g",
+            "garlic": "3 cloves",
+            "olive oil": "40 ml",
+            "chili": "1",
+            "parsley": "5 g",
+            "salt": "1 g"
+        },
+        "cooking_time": 10,
+        "calories": 400,
+        "steps": [
+            "Slice the garlic and chili",
+            "Heat the olive oil with the garlic and chili",
+            "Add the prawns and cook for 2-3 minutes",
+            "Add salt and parsley"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Baked Salmon",
+        "ingredients": {
+            "salmon": "200 g",
+            "lemon": "1",
+            "olive oil": "10 ml",
+            "garlic": "1 clove",
+            "salt": "1 g"
+        },
+        "cooking_time": 15,
+        "calories": 420,
+        "steps": [
+            "Preheat the oven",
+            "Place the salmon on a baking tray",
+            "Add olive oil, garlic, salt and lemon slices",
+            "Bake the salmon"
+        ],
+        "oven_temperature": 200
+    },
+    {
+        "name": "Banana Bread",
+        "ingredients": {
+            "bananas": "3",
+            "flour": "200 g",
+            "sugar": "100 g",
+            "butter": "80 g",
+            "eggs": "2",
+            "baking soda": "5 g"
+        },
+        "cooking_time": 60,
+        "calories": 350,
+        "steps": [
+            "Mash the bananas",
+            "Mix in melted butter, sugar and eggs",
+            "Add the flour and baking soda",
+            "Pour into a loaf tin",
+            "Bake the bread"
+        ],
+        "oven_temperature": 175
+    },
+    {
+        "name": "Lentil Soup",
+        "ingredients": {
+            "lentils": "200 g",
+            "carrot": "1",
+            "onion": "1",
+            "garlic": "1 clove",
+            "olive oil": "15 ml",
+            "water": "1 l",
+            "salt": "3 g"
+        },
+        "cooking_time": 40,
+        "calories": 350,
+        "steps": [
+            "Chop the onion, carrot and garlic",
+            "Fry them in olive oil",
+            "Add the lentils and water",
+            "Simmer until the lentils are soft",
+            "Season with salt"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Greek Salad",
+        "ingredients": {
+            "tomatoes": "200 g",
+            "cucumber": "1",
+            "feta": "80 g",
+            "olives": "30 g",
+            "red onion": "1/2",
+            "olive oil": "15 ml"
+        },
+        "cooking_time": 10,
+        "calories": 350,
+        "steps": [
+            "Chop the tomatoes, cucumber and onion",
+            "Add the olives",
+            "Place the feta on top",
+            "Dress with olive oil"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Caprese Salad",
+        "ingredients": {
+            "tomatoes": "200 g",
+            "mozzarella": "125 g",
+            "basil": "5 g",
+            "olive oil": "15 ml",
+            "salt": "1 g"
+        },
+        "cooking_time": 10,
+        "calories": 400,
+        "steps": [
+            "Slice the tomatoes and mozzarella",
+            "Arrange them alternately on a plate",
+            "Add basil leaves",
+            "Season with olive oil and salt"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Pancakes",
+        "ingredients": {
+            "flour": "120 g",
+            "milk": "200 ml",
+            "eggs": "1",
+            "sugar": "15 g",
+            "butter": "15 g"
+        },
+        "cooking_time": 20,
+        "calories": 450,
+        "steps": [
+            "Mix flour, sugar, milk and egg into a batter",
+            "Melt butter in a pan",
+            "Pour a ladle of batter into the pan",
+            "Flip when bubbles appear",
+            "Repeat with the rest of the batter"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "French Toast",
+        "ingredients": {
+            "bread": "2 slices",
+            "eggs": "1",
+            "milk": "50 ml",
+            "sugar": "10 g",
+            "cinnamon": "1 g",
+            "butter": "10 g"
+        },
+        "cooking_time": 10,
+        "calories": 380,
+        "steps": [
+            "Beat the egg with milk, sugar and cinnamon",
+            "Dip the bread in the mixture",
+            "Fry the bread in butter on both sides"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Scrambled Eggs",
+        "ingredients": {
+            "eggs": "3",
+            "milk": "30 ml",
+            "butter": "10 g",
+            "salt": "1 g",
+            "pepper": "1 g"
+        },
+        "cooking_time": 5,
+        "calories": 300,
+        "steps": [
+            "Beat the eggs with milk, salt and pepper",
+            "Melt butter in a pan over low heat",
+            "Stir the eggs gently until just set"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Chicken Stir Fry",
+        "ingredients": {
+            "chicken breast": "200 g",
+            "broccoli": "150 g",
+            "carrot": "1",
+            "soy sauce": "30 ml",
+            "olive oil": "10 ml",
+            "garlic": "1 clove"
+        },
+        "cooking_time": 20,
+        "calories": 450,
+        "steps": [
+            "Cut the chicken and vegetables into small pieces",
+            "Fry the chicken in oil until cooked",
+            "Add the vegetables and garlic",
+            "Add soy sauce and stir for 2 minutes"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Chicken Quesadilla",
+        "ingredients": {
+            "tortillas": "2",
+            "chicken breast": "100 g",
+            "cheese": "60 g",
+            "red pepper": "1/2",
+            "olive oil": "5 ml"
+        },
+        "cooking_time": 15,
+        "calories": 550,
+        "steps": [
+            "Cook and shred the chicken",
+            "Slice the red pepper",
+            "Put chicken, pepper and cheese on a tortilla",
+            "Cover with the second tortilla",
+            "Cook in a pan on both sides until the cheese melts"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Guacamole",
+        "ingredients": {
+            "avocado": "2",
+            "tomatoes": "1",
+            "onion": "1/2",
+            "lime": "1",
+            "salt": "1 g"
+        },
+        "cooking_time": 10,
+        "calories": 320,
+        "steps": [
+            "Mash the avocados",
+            "Chop the tomato and onion finely",
+            "Mix everything together",
+            "Add lime juice and salt"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Tuna Pasta Salad",
+        "ingredients": {
+            "pasta": "150 g",
+            "tuna": "1 can",
+            "sweetcorn": "50 g",
+            "tomatoes": "1",
+            "mayonnaise": "30 g"
+        },
+        "cooking_time": 15,
+        "calories": 600,
+        "steps": [
+            "Boil the pasta and let it cool",
+            "Drain the tuna",
+            "Chop the tomato",
+            "Mix everything with the mayonnaise"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Baked Potato",
+        "ingredients": {
+            "potatoes": "1 large",
+            "butter": "15 g",
+            "cheese": "30 g",
+            "salt": "1 g"
+        },
+        "cooking_time": 60,
+        "calories": 380,
+        "steps": [
+            "Wash the potato and prick it with a fork",
+            "Bake the potato until soft",
+            "Cut it open",
+            "Add butter, cheese and salt"
+        ],
+        "oven_temperature": 200
+    },
+    {
+        "name": "Tomato Soup",
+        "ingredients": {
+            "tomatoes": "500 g",
+            "onion": "1",
+            "garlic": "1 clove",
+            "olive oil": "15 ml",
+            "vegetable stock": "500 ml",
+            "salt": "2 g"
+        },
+        "cooking_time": 30,
+        "calories": 180,
+        "steps": [
+            "Chop the onion and garlic and fry in olive oil",
+            "Add the chopped tomatoes and stock",
+            "Simmer for 20 minutes",
+            "Blend until smooth and season"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Banana Smoothie",
+        "ingredients": {
+            "bananas": "1",
+            "milk": "250 ml",
+            "yogurt": "125 g",
+            "honey": "10 g"
+        },
+        "cooking_time": 5,
+        "calories": 300,
+        "steps": [
+            "Peel and slice the banana",
+            "Put everything in a blender",
+            "Blend until smooth"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Chocolate Mug Cake",
+        "ingredients": {
+            "flour": "30 g",
+            "sugar": "30 g",
+            "cocoa powder": "15 g",
+            "milk": "45 ml",
+            "sunflower oil": "15 ml"
+        },
+        "cooking_time": 5,
+        "calories": 400,
+        "steps": [
+            "Mix all the ingredients in a mug",
+            "Microwave for about 90 seconds",
+            "Let it cool for a minute before eating"
+        ],
+        "oven_temperature": null
+    },
+    {
+        "name": "Hummus",
+        "ingredients": {
+            "chickpeas": "400 g",
+            "tahini": "30 g",
+            "lemon": "1"
+        },
+        "cooking_time": 10,
+        "calories": 350,
+        "steps": [
+            "Drain the chickpeas",
+            "Blend everything until smooth"
+        ],
+        "oven_temperature": null
+    }
+]
