@@ -74,3 +74,14 @@ def create_recipe(
         steps=steps,
         oven_temperature=oven_temperature,
     )
+
+
+def add_recipe_to_list(
+    recipes: list[Recipe],
+    recipe: Recipe,
+) -> list[Recipe]:
+    for existing in recipes:
+        if existing.name.lower() == recipe.name.lower():
+            raise ValueError(f"A recipe called '{recipe.name}' already exists.")
+
+    return recipes + [recipe]

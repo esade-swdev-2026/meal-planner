@@ -42,11 +42,8 @@ def save_recipes(recipes: list[Recipe], path: Path = RECIPES_FILE) -> None:
 
 
 def add_recipe(recipe: Recipe, path: Path = RECIPES_FILE) -> None:
+    from meal_planner.logic import add_recipe_to_list
+
     recipes = load_recipes(path)
-
-    for existing in recipes:
-        if existing.name.lower() == recipe.name.lower():
-            raise ValueError(f"A recipe called '{recipe.name}' already exists.")
-
-    recipes.append(recipe)
-    save_recipes(recipes, path)
+    updated_recipes = add_recipe_to_list(recipes, recipe)
+    save_recipes(updated_recipes, path)
