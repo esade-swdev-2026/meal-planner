@@ -75,6 +75,7 @@ def create_recipe(
         oven_temperature=oven_temperature,
     )
 
+
 def add_recipe_to_list(
     recipes: list[Recipe],
     recipe: Recipe,
