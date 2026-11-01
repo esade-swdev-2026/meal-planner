@@ -219,6 +219,44 @@ def filter_meals() -> None:
         for recipe in found_recipes:
             typer.echo(f"- {recipe.name} ({recipe.cooking_time} min, {recipe.calories} calories)")
 
+@app.command()
+def how_to_cook():
+    chosen_meal = typer.prompt("Enter a meal").lower()
+    instructions = {}
+
+    for recipe in recipes:
+        if recipe.name.lower() == chosen_meal:
+            instructions["Ingredients"] = recipe.ingredients
+            instructions["Steps"] = recipe.steps
+            instructions["Time"] = recipe.cooking_time
+            instructions["OvenTemperature"] = recipe.oven_temperature
+
+            return typer.echo(
+                f'Ingredients: {instructions["Ingredients"]}, '
+                f'Steps: {instructions["Steps"]}, '
+                f'Cooking Time: {instructions["Time"]} and '
+                f'Oven Temperature: {instructions["OvenTemperature"]}'
+            )
+
+    typer.echo("Recipe not found.")
+
+@app.command()
+def calories_time():
+    chosen_meal = typer.prompt("Enter a meal").lower()
+
+    for recipe in recipes:
+        if recipe["name"].lower() == chosen_meal:
+            meal_calories = recipe["calories"]
+            time = recipe["cooking_time"]
+
+            return typer.echo(
+                f"Total calories: {meal_calories} Kcal and Cooking Time: {time} min"
+            )
+
+    typer.echo("Recipe not found.")
+
+
 
 if __name__ == "__main__":
     app()
+
