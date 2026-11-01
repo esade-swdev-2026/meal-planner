@@ -15,7 +15,7 @@ You need [uv](https://docs.astral.sh/uv/) and git. uv installs the right Python
 version and all dependencies for you.
 
 ```bash
-git clone git@github.com:esade-swdev-2026/meal-planner.git
+git clone https://github.com/esade-swdev-2026/meal-planner.git
 cd meal-planner
 uv sync
 ```
@@ -110,6 +110,13 @@ New recipes are saved to `src/meal_planner/recipes.json`. A recipe with a name
 that already exists, no ingredients, no steps, or a cooking time or calorie
 value of zero is refused with a message, and nothing is saved.
 
+### Surprise me
+
+Ask for a recipe suggestion using ingredients you have:
+
+```bash
+uv run meal-planner surprise-me --ingredient pasta --ingredient tomato
+```
 ### Errors
 
 Bad input never crashes the program: you get a message starting with `Error:`
