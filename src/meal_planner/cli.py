@@ -55,11 +55,13 @@ def show() -> None:
         if recipe.oven_temperature is not None:
             typer.echo(f"Oven temperature: {recipe.oven_temperature}°C")
 
+
 @app.command("count-recipes")
 def count_recipes() -> None:
     """Show the total number of available recipes."""
     recipes = load_recipes_or_exit()
     typer.echo(f"Total recipes: {len(recipes)}")
+
 
 @app.command()
 def filter_meals() -> None:
