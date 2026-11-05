@@ -141,3 +141,19 @@ def test_calorie_filter_respects_limit(
     result = filter_by_calories(sample_recipes, maximum)
 
     assert [recipe.name for recipe in result] == expected_names
+
+
+def test_fastest_meal(
+    sample_recipes: list[Recipe],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recipes = [sample_recipes[1], sample_recipes[0]]
+    monkeypatch.setattr(
+        "meal_planner.cli.load_recipes_or_exit",
+        lambda: recipes,
+    )
+
+    result = runner.invoke(app, ["fastest-meal"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == "Toast (10 min)"
