@@ -14,7 +14,12 @@ runner = CliRunner()
 
 # CLI tests: check the commands and their output.
 
+def test_count_recipes() -> None:
+    result = runner.invoke(app, ["count-recipes"])
 
+    assert result.exit_code == 0
+    assert "Total recipes:" in result.stdout
+    
 def test_show() -> None:
     result = runner.invoke(app, ["show"])
 
