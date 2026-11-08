@@ -90,11 +90,4 @@ def add_recipe_to_list(
 def find_fastest_recipe(recipes: list[Recipe]) -> Recipe | None:
     if not recipes:
         return None
-
-    fastest = recipes[0]
-
-    for recipe in recipes[1:]:
-        if recipe.cooking_time < fastest.cooking_time:
-            fastest = recipe
-
-    return fastest
+    return min(recipes, key=lambda recipe: recipe.cooking_time)
