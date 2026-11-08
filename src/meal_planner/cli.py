@@ -8,6 +8,7 @@ from meal_planner.logic import (
     filter_by_calories,
     filter_by_ingredient,
     filter_by_time,
+    find_fastest_recipe,
 )
 from meal_planner.prompts import (
     ask_daily_options,
@@ -174,6 +175,19 @@ def surprise_me() -> None:
     typer.echo(f"\nToday's suggestion: {recipe.name}")
     typer.echo(f"Cooking time: {recipe.cooking_time} minutes")
     typer.echo(f"Calories: {recipe.calories}")
+
+
+@app.command()
+def fastest_meal() -> None:
+    """Show the recipe with the shortest cooking time."""
+    recipes = load_recipes_or_exit()
+    recipe = find_fastest_recipe(recipes)
+
+    if recipe is None:
+        typer.echo("No recipes available.")
+        return
+
+    typer.echo(f"{recipe.name} ({recipe.cooking_time} min)")
 
 
 if __name__ == "__main__":

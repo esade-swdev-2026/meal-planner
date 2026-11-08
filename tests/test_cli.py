@@ -1,3 +1,5 @@
+from copy import copy
+
 import pytest
 from typer.testing import CliRunner
 
@@ -6,6 +8,7 @@ from meal_planner.logic import (
     filter_by_calories,
     filter_by_ingredient,
     filter_by_time,
+    find_fastest_recipe,
 )
 from meal_planner.recipes import Recipe
 
@@ -164,3 +167,42 @@ def test_calorie_filter_respects_limit(
     result = filter_by_calories(sample_recipes, maximum)
 
     assert [recipe.name for recipe in result] == expected_names
+
+
+def test_fastest_meal(
+    sample_recipes: list[Recipe],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recipes = [sample_recipes[1], sample_recipes[0]]
+    monkeypatch.setattr(
+        "meal_planner.cli.load_recipes_or_exit",
+        lambda: recipes,
+    )
+
+    result = runner.invoke(app, ["fastest-meal"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == "Toast (10 min)"
+
+
+def test_find_fastest_recipe_returns_none_for_empty_list() -> None:
+    assert find_fastest_recipe([]) is None
+
+
+def test_find_fastest_recipe_returns_first_on_tie(
+    sample_recipes: list[Recipe],
+) -> None:
+    first = sample_recipes[0]
+    twin = copy(first)  # same cooking time as first
+
+    assert find_fastest_recipe([first, twin]) is first
+    assert find_fastest_recipe([twin, first]) is twin
+
+
+def test_fastest_meal_with_no_recipes(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("meal_planner.cli.load_recipes_or_exit", lambda: [])
+
+    result = runner.invoke(app, ["fastest-meal"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == "No recipes available."

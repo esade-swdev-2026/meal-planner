@@ -85,3 +85,9 @@ def add_recipe_to_list(
             raise ValueError(f"A recipe called '{recipe.name}' already exists.")
 
     return recipes + [recipe]
+
+
+def find_fastest_recipe(recipes: list[Recipe]) -> Recipe | None:
+    if not recipes:
+        return None
+    return min(recipes, key=lambda recipe: recipe.cooking_time)
