@@ -15,6 +15,29 @@ runner = CliRunner()
 # CLI tests: check the commands and their output.
 
 
+@pytest.mark.parametrize(
+    ("recipes", "expected_count"),
+    [
+        (["Recipe A", "Recipe B"], 2),
+        ([], 0),
+    ],
+)
+def test_count_recipes(
+    monkeypatch: pytest.MonkeyPatch,
+    recipes: list[str],
+    expected_count: int,
+) -> None:
+    monkeypatch.setattr(
+        "meal_planner.cli.load_recipes_or_exit",
+        lambda: recipes,
+    )
+
+    result = runner.invoke(app, ["count-recipes"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == f"Total recipes: {expected_count}"
+
+
 def test_show() -> None:
     result = runner.invoke(app, ["show"])
 
