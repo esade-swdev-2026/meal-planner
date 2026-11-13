@@ -106,9 +106,14 @@ The app asks for the name, the ingredients and their quantities, the cooking
 time, the calories, the steps and the oven temperature (`0` if no oven). To
 finish the list of ingredients or steps, press Enter on an empty line.
 
-New recipes are saved to `src/meal_planner/recipes.json`. A recipe with a name
-that already exists, no ingredients, no steps, or a cooking time or calorie
-value of zero is refused with a message, and nothing is saved.
+New recipes are saved to `data/recipes.json`, in the folder where you run the
+app. The first time the app runs, it creates that file as a copy of the recipes
+that ship with the app (`src/meal_planner/recipes.json`), which is never changed.
+`data/` is ignored by git, so your own recipes do not show up in `git status`.
+Delete `data/` to start again from the original recipes.
+
+A recipe with a name that already exists, no ingredients, no steps, or a cooking
+time or calorie value of zero is refused with a message, and nothing is saved.
 
 ### Surprise me
 
@@ -143,14 +148,15 @@ talking to the user:
 
 ```
 src/meal_planner/
-├── recipes.json       the recipe data
-├── recipes.py         storage: the Recipe class, loading and saving recipes.json
+├── recipes.json       the starting recipes (read only; copied to data/recipes.json)
+├── recipes.py         storage: the Recipe class, loading and saving data/recipes.json
 ├── logic.py           business logic: filtering recipes, creating a new recipe
 ├── weekly_planner.py  business logic: building and changing a weekly plan
 ├── prompts.py         asking the user questions and printing results
 ├── cli.py             the Typer commands, which connect everything
 └── __main__.py        lets you run the app with `python -m meal_planner`
 tests/
+├── conftest.py             points the app to a temporary data file during tests
 ├── test_cli.py             filters and the show / filter-meals commands
 ├── test_recipes.py         creating and adding recipes
 ├── test_weekly_planner.py  building and changing a weekly plan

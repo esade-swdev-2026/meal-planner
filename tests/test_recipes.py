@@ -2,9 +2,11 @@ import json
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
+from meal_planner.cli import app
 from meal_planner.logic import create_recipe
-from meal_planner.recipes import Recipe, add_recipe, load_recipes
+from meal_planner.recipes import SEED_FILE, Recipe, add_recipe, ensure_data_file, load_recipes
 
 
 def test_create_recipe_builds_recipe() -> None:
@@ -75,3 +77,33 @@ def test_add_recipe_rejects_duplicate_name(recipes_file: Path) -> None:
         add_recipe(duplicate, recipes_file)
 
     assert len(load_recipes(recipes_file)) == 1
+
+
+def test_ensure_data_file_copies_seed_when_missing(tmp_path: Path, recipes_file: Path) -> None:
+    data_file = tmp_path / "data" / "recipes.json"
+
+    result = ensure_data_file(data_file, seed_file=recipes_file)
+
+    assert result == data_file
+    assert data_file.read_text(encoding="utf-8") == recipes_file.read_text(encoding="utf-8")
+
+
+def test_ensure_data_file_keeps_existing_working_copy(tmp_path: Path, recipes_file: Path) -> None:
+    data_file = tmp_path / "data" / "recipes.json"
+    data_file.parent.mkdir()
+    data_file.write_text("[]", encoding="utf-8")
+
+    ensure_data_file(data_file, seed_file=recipes_file)
+
+    assert data_file.read_text(encoding="utf-8") == "[]"
+
+
+def test_add_recipe_command_writes_working_copy_not_seed(isolated_data_file: Path) -> None:
+    seed_before = SEED_FILE.read_text(encoding="utf-8")
+    answers = "Test Toast\nbread\n1 slice\n\n5\n100\nToast it\n\n0\n"
+
+    result = CliRunner().invoke(app, ["add-recipe"], input=answers)
+
+    assert result.exit_code == 0
+    assert "Test Toast" in [recipe.name for recipe in load_recipes(isolated_data_file)]
+    assert SEED_FILE.read_text(encoding="utf-8") == seed_before

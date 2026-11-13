@@ -1,7 +1,10 @@
 import json
+import shutil
 from pathlib import Path
 
-RECIPES_FILE = Path(__file__).parent / "recipes.json"
+SEED_FILE = Path(__file__).parent / "recipes.json"
+
+DATA_FILE = Path("data") / "recipes.json"
 
 
 class Recipe:
@@ -22,7 +25,7 @@ class Recipe:
         self.oven_temperature = oven_temperature
 
 
-def load_recipes(path: Path = RECIPES_FILE) -> list[Recipe]:
+def load_recipes(path: Path = DATA_FILE) -> list[Recipe]:
     with open(path, encoding="utf-8") as file:
         data = json.load(file)
 
@@ -34,16 +37,25 @@ def load_recipes(path: Path = RECIPES_FILE) -> list[Recipe]:
         ) from error
 
 
-def save_recipes(recipes: list[Recipe], path: Path = RECIPES_FILE) -> None:
+def save_recipes(recipes: list[Recipe], path: Path = DATA_FILE) -> None:
     data = [vars(recipe) for recipe in recipes]
 
     with open(path, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
 
 
-def add_recipe(recipe: Recipe, path: Path = RECIPES_FILE) -> None:
+def add_recipe(recipe: Recipe, path: Path = DATA_FILE) -> None:
     from meal_planner.logic import add_recipe_to_list
 
     recipes = load_recipes(path)
     updated_recipes = add_recipe_to_list(recipes, recipe)
     save_recipes(updated_recipes, path)
+
+
+def ensure_data_file(data_file: Path = DATA_FILE, seed_file: Path = SEED_FILE) -> Path:
+    """Create the working copy from the seed if it does not exist yet."""
+    if not data_file.exists():
+        data_file.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(seed_file, data_file)
+
+    return data_file
