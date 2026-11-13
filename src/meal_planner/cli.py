@@ -19,7 +19,7 @@ from meal_planner.prompts import (
     display_weekly_plan,
     edit_weekly_plan,
 )
-from meal_planner.recipes import Recipe, add_recipe, load_recipes
+from meal_planner.recipes import DATA_FILE, Recipe, add_recipe, ensure_data_file, load_recipes
 from meal_planner.surprise import choose_surprise_meal
 from meal_planner.weekly_planner import create_weekly_plan
 
@@ -33,7 +33,7 @@ def exit_with_error(message: str) -> NoReturn:
 
 def load_recipes_or_exit() -> list[Recipe]:
     try:
-        return load_recipes()
+        return load_recipes(ensure_data_file(DATA_FILE))
     except OSError as error:
         exit_with_error(f"could not open the recipes file ({error.strerror}).")
     except ValueError as error:
@@ -122,7 +122,7 @@ def add_recipe_command() -> None:
             steps,
             oven_temperature,
         )
-        add_recipe(recipe)
+        add_recipe(recipe, ensure_data_file(DATA_FILE))
     except ValueError as error:
         exit_with_error(str(error))
     except OSError as error:
