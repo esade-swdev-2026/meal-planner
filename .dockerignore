@@ -1,7 +1,9 @@
+data/
 .venv/
 .git/
 __pycache__/
 *.py[cod]
 .ruff_cache/
-.mypy_cache/
+.mypy_cache/s
+.ruff_cache/
 .pytest_cache/
