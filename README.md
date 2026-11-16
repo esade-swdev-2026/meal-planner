@@ -128,6 +128,21 @@ Bad input never crashes the program: you get a message starting with `Error:`
 and the exit code is 1. For example, choosing option `9` in `filter-meals`, or
 a missing or broken `recipes.json`.
 
+## Run with Docker
+
+Build the image:
+
+```bash
+docker build -t meal-planner .
+```
+
+Your recipes are kept in a named volume, `meal-data`, so they survive `docker rm`:
+
+```bash
+docker run --rm -it -v meal-data:/app/data meal-planner add-recipe
+docker run --rm -v meal-data:/app/data meal-planner show
+```
+
 ## Run the checks
 
 These are the same checks the GitHub Actions workflow runs:
