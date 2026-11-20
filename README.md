@@ -117,11 +117,52 @@ time or calorie value of zero is refused with a message, and nothing is saved.
 
 ### Surprise me
 
-Ask for a recipe suggestion using ingredients you have:
+Suggests a random recipe that you can cook with the ingredients you have.
 
 ```bash
-uv run meal-planner surprise-me --ingredient pasta --ingredient tomato
+uv run meal-planner surprise-me
 ```
+
+The app asks for your ingredients. Type them separated by commas. A recipe is only
+suggested if you have **all** of its ingredients, and the names must match the
+recipe's ingredient names (for example `tomatoes`, not `tomato`).
+
+```
+SURPRISE ME
+Ingredients you have (separated by commas): bread, tomatoes, garlic, olive oil, salt
+
+Today's suggestion: Pan con Tomate
+Cooking time: 5 minutes
+Calories: 250
+```
+
+If no recipe can be made with your ingredients, the app tells you so.
+
+### Count recipes
+
+Shows how many recipes the app has, including the ones you added yourself.
+
+```bash
+uv run meal-planner count-recipes
+```
+
+```
+Total recipes: 26
+```
+
+### Fastest meal
+
+Shows the recipe with the shortest cooking time. If two recipes take the same time,
+the one that comes first in the list is shown.
+
+```bash
+uv run meal-planner fastest-meal
+```
+
+```
+Pan con Tomate (5 min)
+```
+
 ### Errors
 
 Bad input never crashes the program: you get a message starting with `Error:`
@@ -180,7 +221,8 @@ tests/
 
 ## Use of AI
 
-We used an AI assistant (Claude, by Anthropic) during this project. We used it to:
+We decided the structure of the project ourselves. We used AI assistants (Claude,
+by Anthropic, and ChatGPT, by OpenAI) as a help during the project. We used them to:
 
 - **Polish our functions and tests**: improve names and type hints, fix the
   errors reported by ruff and mypy, and add tests for edge cases and bad input.
@@ -192,8 +234,13 @@ We used an AI assistant (Claude, by Anthropic) during this project. We used it t
   functions with tests, clear error messages) and all the submission
   requirements are applied.
 - **Restructure the code and write this README**: split the program into the
-  modules listed above, add the error handling, and draft this README.
+  modules listed above, add the error handling, and draft and fix this README.
+- **Work directly in the project folder**: in one session, Claude was able to read
+  and edit files in our repository. It made changes to the README and to the Docker
+  and workflow files without us asking for them. We discarded those changes before
+  committing anything, and we only kept what we reviewed and added ourselves.
 
-The team reviewed every change, ran the program and the checks
+We asked the assistants to explain things before using them, and we only kept what
+we understood. The team reviewed every change, ran the program and the checks
 (`ruff`, `mypy` and `pytest`) ourselves, and decided what went into the final
 version.
