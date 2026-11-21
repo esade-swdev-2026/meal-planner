@@ -45,6 +45,9 @@ def check_recipe_fields(item: dict[str, object]) -> None:
     if not isinstance(name, str) or not name.strip():
         raise ValueError("a recipe has an empty name.")
 
+    if not item["ingredients"]:
+        raise ValueError(f"'{name}' needs at least one ingredient.")
+
     if not is_text_pairs(item["ingredients"]):
         raise ValueError(f'\'{name}\' must list its ingredients as "name": "quantity".')
 
@@ -52,6 +55,9 @@ def check_recipe_fields(item: dict[str, object]) -> None:
         if not is_positive_whole_number(item[field]):
             readable_field = field.replace("_", " ")
             raise ValueError(f"'{name}' has a {readable_field} that is not a whole number above 0.")
+
+    if not item["steps"]:
+        raise ValueError(f"'{name}' needs at least one step.")
 
     if not is_text_list(item["steps"]):
         raise ValueError(f"'{name}' must list its steps as text.")

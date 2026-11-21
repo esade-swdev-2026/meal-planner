@@ -84,6 +84,7 @@ def test_load_recipes_accepts_a_valid_recipe(tmp_path: Path) -> None:
     ("field", "value", "message"),
     [
         ("name", "  ", "empty name"),
+        ("ingredients", {}, "at least one ingredient"),
         ("ingredients", ["bread"], "ingredients"),
         ("ingredients", {"bread": 2}, "ingredients"),
         ("cooking_time", "fast", "cooking time"),
@@ -91,6 +92,7 @@ def test_load_recipes_accepts_a_valid_recipe(tmp_path: Path) -> None:
         ("cooking_time", True, "cooking time"),
         ("calories", -5, "calories"),
         ("calories", 2.5, "calories"),
+        ("steps", [], "at least one step"),
         ("steps", "Toast the bread", "steps"),
         ("oven_temperature", "hot", "oven temperature"),
     ],
