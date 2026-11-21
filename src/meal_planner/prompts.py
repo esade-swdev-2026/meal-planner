@@ -100,11 +100,30 @@ def display_weekly_plan(plan: list[Recipe]) -> None:
         )
 
 
-def display_shopping_list(shopping_list: dict[str, str]) -> None:
-    typer.echo("\nSHOPPING LIST")
+def display_shopping_list(shopping_list: dict[str, str], title: str = "SHOPPING LIST") -> None:
+    typer.echo(f"\n{title}")
+
+    if not shopping_list:
+        typer.echo("You already have everything you need.")
+        return
 
     for ingredient, quantity in shopping_list.items():
         typer.echo(f"- {ingredient}: {quantity}")
+
+
+def ask_owned_ingredients() -> dict[str, str]:
+    if not typer.confirm("\nDo you already have some of these ingredients?", default=False):
+        return {}
+
+    typer.echo("Use the same units as the shopping list, for example g, ml or slices.")
+    return ask_ingredients()
+
+
+def display_not_subtracted(not_subtracted: dict[str, str]) -> None:
+    for ingredient, quantity in not_subtracted.items():
+        typer.echo(
+            f"Could not subtract {ingredient} ({quantity}): use the same unit as the shopping list."
+        )
 
 
 def edit_weekly_plan(

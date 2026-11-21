@@ -14,14 +14,16 @@ from meal_planner.prompts import (
     ask_daily_options,
     ask_ingredients,
     ask_oven_temperature,
+    ask_owned_ingredients,
     ask_positive_integer,
     ask_steps,
+    display_not_subtracted,
     display_shopping_list,
     display_weekly_plan,
     edit_weekly_plan,
 )
 from meal_planner.recipes import DATA_FILE, Recipe, add_recipe, ensure_data_file, load_recipes
-from meal_planner.shopping_list import build_shopping_list
+from meal_planner.shopping_list import build_shopping_list, subtract_owned_ingredients
 from meal_planner.surprise import choose_surprise_meal
 from meal_planner.weekly_planner import create_weekly_plan
 
@@ -135,7 +137,7 @@ def add_recipe_command() -> None:
 
 @app.command()
 def weekly_plan() -> None:
-    """Create a weekly plan and optionally replace meals."""
+    """Create a weekly plan, optionally replace meals, and show the shopping list."""
     available_recipes = load_recipes_or_exit()
 
     typer.echo("\nCREATE YOUR WEEKLY PLAN")
@@ -159,7 +161,15 @@ def weekly_plan() -> None:
 
     typer.echo("\nYOUR FINAL PLAN")
     display_weekly_plan(plan)
-    display_shopping_list(build_shopping_list(plan))
+    shopping_list = build_shopping_list(plan)
+    display_shopping_list(shopping_list)
+
+    owned_ingredients = ask_owned_ingredients()
+
+    if owned_ingredients:
+        still_to_buy, not_subtracted = subtract_owned_ingredients(shopping_list, owned_ingredients)
+        display_shopping_list(still_to_buy, title="STILL TO BUY")
+        display_not_subtracted(not_subtracted)
 
 
 @app.command()
