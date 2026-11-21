@@ -115,7 +115,15 @@ def ask_owned_ingredients() -> dict[str, str]:
     if not typer.confirm("\nDo you already have some of these ingredients?", default=False):
         return {}
 
+    typer.echo("Use the same units as the shopping list, for example g, ml or slices.")
     return ask_ingredients()
+
+
+def display_not_subtracted(not_subtracted: dict[str, str]) -> None:
+    for ingredient, quantity in not_subtracted.items():
+        typer.echo(
+            f"Could not subtract {ingredient} ({quantity}): use the same unit as the shopping list."
+        )
 
 
 def edit_weekly_plan(

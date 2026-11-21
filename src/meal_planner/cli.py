@@ -17,6 +17,7 @@ from meal_planner.prompts import (
     ask_owned_ingredients,
     ask_positive_integer,
     ask_steps,
+    display_not_subtracted,
     display_shopping_list,
     display_weekly_plan,
     edit_weekly_plan,
@@ -166,8 +167,9 @@ def weekly_plan() -> None:
     owned_ingredients = ask_owned_ingredients()
 
     if owned_ingredients:
-        still_to_buy = subtract_owned_ingredients(shopping_list, owned_ingredients)
+        still_to_buy, not_subtracted = subtract_owned_ingredients(shopping_list, owned_ingredients)
         display_shopping_list(still_to_buy, title="STILL TO BUY")
+        display_not_subtracted(not_subtracted)
 
 
 @app.command()
