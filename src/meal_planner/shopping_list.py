@@ -12,9 +12,12 @@ def combine_quantities(quantities: list[str]) -> str:
     units = []
 
     for quantity in quantities:
-        parts = quantity.split(" ", 1)
+        parts = quantity.split()
+        if not parts:
+            return " + ".join(quantities)
+
         number = parts[0]
-        unit = parts[1] if len(parts) == 2 else ""
+        unit = " ".join(parts[1:])
 
         if not number.isdigit() or unit not in ADDABLE_UNITS:
             return " + ".join(quantities)

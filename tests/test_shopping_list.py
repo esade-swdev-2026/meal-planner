@@ -30,6 +30,18 @@ def test_quantities_with_different_units_are_listed() -> None:
     assert combine_quantities(["1 clove", "3 cloves"]) == "1 clove + 3 cloves"
 
 
+def test_extra_spaces_do_not_stop_quantities_being_added() -> None:
+    assert combine_quantities(["200  g", " 150 g "]) == "350 g"
+
+
+def test_different_weight_units_are_not_added() -> None:
+    assert combine_quantities(["1 kg", "500 g"]) == "1 kg + 500 g"
+
+
+def test_empty_quantity_is_listed() -> None:
+    assert combine_quantities(["", "2"]) == " + 2"
+
+
 def test_quantities_that_are_not_whole_numbers_are_listed() -> None:
     assert combine_quantities(["1/2", "1"]) == "1/2 + 1"
 
