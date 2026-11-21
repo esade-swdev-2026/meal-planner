@@ -100,6 +100,13 @@ def display_weekly_plan(plan: list[Recipe]) -> None:
         )
 
 
+def display_shopping_list(shopping_list: dict[str, str]) -> None:
+    typer.echo("\nSHOPPING LIST")
+
+    for ingredient, quantity in shopping_list.items():
+        typer.echo(f"- {ingredient}: {quantity}")
+
+
 def edit_weekly_plan(
     plan: list[Recipe],
     daily_options: list[list[Recipe]],

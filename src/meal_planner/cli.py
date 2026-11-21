@@ -16,10 +16,12 @@ from meal_planner.prompts import (
     ask_oven_temperature,
     ask_positive_integer,
     ask_steps,
+    display_shopping_list,
     display_weekly_plan,
     edit_weekly_plan,
 )
 from meal_planner.recipes import DATA_FILE, Recipe, add_recipe, ensure_data_file, load_recipes
+from meal_planner.shopping_list import build_shopping_list
 from meal_planner.surprise import choose_surprise_meal
 from meal_planner.weekly_planner import create_weekly_plan
 
@@ -157,6 +159,7 @@ def weekly_plan() -> None:
 
     typer.echo("\nYOUR FINAL PLAN")
     display_weekly_plan(plan)
+    display_shopping_list(build_shopping_list(plan))
 
 
 @app.command()
