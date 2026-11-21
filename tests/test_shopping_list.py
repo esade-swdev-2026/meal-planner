@@ -3,7 +3,12 @@ from typer.testing import CliRunner
 
 from meal_planner.cli import app
 from meal_planner.recipes import Recipe
-from meal_planner.shopping_list import build_shopping_list, combine_quantities
+from meal_planner.shopping_list import (
+    build_shopping_list,
+    combine_quantities,
+    parse_quantity,
+    subtract_owned_ingredients,
+)
 
 runner = CliRunner()
 
@@ -83,12 +88,91 @@ def test_cli_weekly_plan_shows_the_shopping_list(
     calories = "500\n"
     minutes_for_each_day = "10\n" * 7
     keep_the_plan = "n\n"
+    nothing_owned = "n\n"
 
     result = runner.invoke(
-        app, ["weekly-plan"], input=calories + minutes_for_each_day + keep_the_plan
+        app,
+        ["weekly-plan"],
+        input=calories + minutes_for_each_day + keep_the_plan + nothing_owned,
     )
 
     assert result.exit_code == 0
     assert "SHOPPING LIST" in result.stdout
     assert "- bread: 2 slices + 2 slices" in result.stdout
     assert "- olive oil: 70 ml" in result.stdout
+    assert "STILL TO BUY" not in result.stdout
+
+
+def test_parse_quantity_splits_number_and_unit() -> None:
+    assert parse_quantity("200 g") == (200, "g")
+    assert parse_quantity("2") == (2, "")
+
+
+def test_parse_quantity_refuses_what_cannot_be_added() -> None:
+    assert parse_quantity("1/2") is None
+    assert parse_quantity("3 cloves") is None
+    assert parse_quantity("") is None
+
+
+def test_owned_amount_is_subtracted() -> None:
+    still_to_buy = subtract_owned_ingredients({"pasta": "500 g"}, {"pasta": "200 g"})
+
+    assert still_to_buy == {"pasta": "300 g"}
+
+
+def test_plain_counts_are_subtracted() -> None:
+    assert subtract_owned_ingredients({"eggs": "6"}, {"eggs": "2"}) == {"eggs": "4"}
+
+
+def test_ingredient_fully_covered_is_left_out() -> None:
+    still_to_buy = subtract_owned_ingredients(
+        {"pasta": "500 g", "milk": "200 ml"},
+        {"pasta": "500 g", "milk": "1000 ml"},
+    )
+
+    assert still_to_buy == {}
+
+
+def test_ingredients_not_owned_stay_on_the_list() -> None:
+    still_to_buy = subtract_owned_ingredients({"pasta": "500 g", "salt": "5 g"}, {"pasta": "200 g"})
+
+    assert still_to_buy == {"pasta": "300 g", "salt": "5 g"}
+
+
+def test_different_units_are_not_subtracted() -> None:
+    still_to_buy = subtract_owned_ingredients({"flour": "500 g"}, {"flour": "1 kg"})
+
+    assert still_to_buy == {"flour": "500 g"}
+
+
+def test_quantities_that_cannot_be_compared_stay_as_they_were() -> None:
+    still_to_buy = subtract_owned_ingredients({"garlic": "3 cloves"}, {"garlic": "1 clove"})
+
+    assert still_to_buy == {"garlic": "3 cloves"}
+
+
+def test_owned_names_ignore_case_and_spaces() -> None:
+    still_to_buy = subtract_owned_ingredients({"olive oil": "70 ml"}, {" Olive Oil ": "50 ml"})
+
+    assert still_to_buy == {"olive oil": "20 ml"}
+
+
+def test_cli_weekly_plan_subtracts_what_the_user_has(
+    toast: Recipe, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("meal_planner.cli.load_recipes_or_exit", lambda: [toast])
+    calories = "500\n"
+    minutes_for_each_day = "10\n" * 7
+    keep_the_plan = "n\n"
+    owned_olive_oil = "y\nolive oil\n50 ml\n\n"
+
+    result = runner.invoke(
+        app,
+        ["weekly-plan"],
+        input=calories + minutes_for_each_day + keep_the_plan + owned_olive_oil,
+    )
+
+    assert result.exit_code == 0
+    still_to_buy = result.stdout.split("STILL TO BUY")[1]
+    assert "- olive oil: 20 ml" in still_to_buy
+    assert "- bread: 2 slices + 2 slices" in still_to_buy
