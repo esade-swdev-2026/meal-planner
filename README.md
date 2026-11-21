@@ -8,6 +8,10 @@ recipes and lets you:
 - **add** your own recipes,
 - **plan a week**: one meal per day, within a calorie limit and a cooking time
   you choose for each day. You can then swap any day's meal.
+- **build a shopping list** and subtract ingredients you already have,
+- **get a surprise meal** using ingredients available to you,
+- **count** your saved recipes,
+- **find the fastest meal** to cook.
 
 ## Install
 
@@ -96,18 +100,39 @@ Answer `y` to replace a day's meal, either with another random recipe or by
 choosing from a list of recipes that fit that day's limits. Answer `n` (or
 press Enter) to finish and see your final plan.
 
-At the end, the app shows a shopping list with every ingredient your week needs.
-Quantities in g, kg, ml or l, and plain counts, are added up; other quantities
-are listed as they are:
+At the end, the app shows a shopping list based on your final plan. It adds
+compatible quantities, including counts such as slices and cloves, and converts
+kg to g and l to ml. For example:
 
 ```
 SHOPPING LIST
-- bread: 2 slices
-- eggs: 2
-- garlic: 3 cloves + 1 clove
+- bread: 4 slices
+- garlic: 4 cloves
 - olive oil: 100 ml
 ...
 ```
+
+You can then enter ingredients you already have. Leave the ingredient name empty
+to finish. The app subtracts those quantities and shows what is still missing:
+
+```
+Do you already have some of these ingredients? [y/N]: y
+...
+
+Ingredient: olive oil
+Quantity of olive oil (e.g. 200 g): 50 ml
+Ingredient:
+
+STILL TO BUY
+- bread: 4 slices
+- garlic: 4 cloves
+- olive oil: 50 ml
+...
+```
+
+Ingredients you have enough of are removed. If a quantity cannot be subtracted,
+the app displays a warning and keeps the original amount on the list.
+
 ### Add a recipe
 
 ```bash
@@ -138,6 +163,9 @@ uv run meal-planner surprise-me
 The app asks for your ingredients. Type them separated by commas. A recipe is only
 suggested if you have **all** of its ingredients, and the names must match the
 recipe's ingredient names (for example `tomatoes`, not `tomato`).
+
+This command checks ingredient names, not quantities: it does not check whether
+you have enough of each ingredient.
 
 ```
 SURPRISE ME
@@ -177,23 +205,50 @@ Pan con Tomate (5 min)
 
 ### Errors
 
-Bad input never crashes the program: you get a message starting with `Error:`
-and the exit code is 1. For example, choosing option `9` in `filter-meals`, or
-a missing or broken `recipes.json`.
+Handled input and file errors produce a clear message and exit code `1`.
+For example, choosing option `9` in `filter-meals` prints:
+
+```text
+Error: '9' is not a valid option. Choose 1, 2 or 3.
+```
+
+Invalid JSON and recipe files with missing or unknown fields are also reported
+with an error message.
 
 ## Run with Docker
 
-Build the image:
+### Run the published image
+
+You can run the app without cloning the repository or building the image:
+
+```bash
+docker pull ghcr.io/esade-swdev-2026/meal-planner:32fe963
+docker run --rm ghcr.io/esade-swdev-2026/meal-planner:32fe963 --help
+```
+
+If the package is private, first run `docker login ghcr.io` using a GitHub
+account with access and a token with `read:packages` permission.
+
+Use `-it` for commands that ask questions. Your recipes are kept in a named
+volume, `meal-data`, so they survive when the container is removed:
+
+```bash
+docker run --rm -it -v meal-data:/app/data ghcr.io/esade-swdev-2026/meal-planner:32fe963 add-recipe
+docker run --rm -v meal-data:/app/data ghcr.io/esade-swdev-2026/meal-planner:32fe963 show
+docker run --rm -it -v meal-data:/app/data ghcr.io/esade-swdev-2026/meal-planner:32fe963 weekly-plan
+```
+
+Always use the same volume name to access your saved recipes. Without the
+volume, changes are lost when the container is removed.
+
+### Build the image yourself
+
+Alternatively, from the project folder:
 
 ```bash
 docker build -t meal-planner .
-```
-
-Your recipes are kept in a named volume, `meal-data`, so they survive `docker rm`:
-
-```bash
-docker run --rm -it -v meal-data:/app/data meal-planner add-recipe
-docker run --rm -v meal-data:/app/data meal-planner show
+docker run --rm meal-planner --help
+docker run --rm -it -v meal-data:/app/data meal-planner weekly-plan
 ```
 
 ## Run the checks
@@ -216,19 +271,25 @@ talking to the user:
 
 ```
 src/meal_planner/
-├── recipes.json       the starting recipes (read only; copied to data/recipes.json)
-├── recipes.py         storage: the Recipe class, loading and saving data/recipes.json
-├── logic.py           business logic: filtering recipes, creating a new recipe
-├── weekly_planner.py  business logic: building and changing a weekly plan
-├── prompts.py         asking the user questions and printing results
-├── cli.py             the Typer commands, which connect everything
-└── __main__.py        lets you run the app with `python -m meal_planner`
+├── recipes.json          the starting recipes (copied to data/recipes.json)
+├── recipes.py            the Recipe class, loading and saving recipes
+├── logic.py              filtering recipes and creating new recipes
+├── weekly_planner.py     building and changing a weekly plan
+├── shopping_list.py      combining quantities and subtracting owned ingredients
+├── ingredient_matching.py matching available ingredients to recipes
+├── surprise.py           choosing a random cookable recipe
+├── prompts.py            asking questions and printing results
+├── cli.py                the Typer commands, which connect everything
+└── __main__.py           runs the app with python -m meal_planner
 tests/
-├── conftest.py             points the app to a temporary data file during tests
-├── test_cli.py             filters and the show / filter-meals commands
-├── test_recipes.py         creating and adding recipes
-├── test_weekly_planner.py  building and changing a weekly plan
-└── test_bad_input.py       clear errors for bad input and broken files
+├── conftest.py                  temporary recipe data during tests
+├── test_cli.py                  command behaviour and recipe filters
+├── test_recipes.py              creating and saving recipes
+├── test_weekly_planner.py       building and changing weekly plans
+├── test_shopping_list.py        quantities, subtraction and shopping-list output
+├── test_ingredient_matching.py  matching available ingredients
+├── test_surprise.py             random meal selection and surprise-me
+└── test_bad_input.py            errors for bad input and broken files
 ```
 
 ## Use of AI
@@ -247,10 +308,6 @@ by Anthropic, and ChatGPT, by OpenAI) as a help during the project. We used them
   requirements are applied.
 - **Restructure the code and write this README**: split the program into the
   modules listed above, add the error handling, and draft and fix this README.
-- **Work directly in the project folder**: in one session, Claude was able to read
-  and edit files in our repository. It made changes to the README and to the Docker
-  and workflow files without us asking for them. We discarded those changes before
-  committing anything, and we only kept what we reviewed and added ourselves.
 
 We asked the assistants to explain things before using them, and we only kept what
 we understood. The team reviewed every change, ran the program and the checks
