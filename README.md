@@ -96,6 +96,18 @@ Answer `y` to replace a day's meal, either with another random recipe or by
 choosing from a list of recipes that fit that day's limits. Answer `n` (or
 press Enter) to finish and see your final plan.
 
+At the end, the app shows a shopping list with every ingredient your week needs.
+Quantities in g, kg, ml or l, and plain counts, are added up; other quantities
+are listed as they are:
+
+```
+SHOPPING LIST
+- bread: 2 slices
+- eggs: 2
+- garlic: 3 cloves + 1 clove
+- olive oil: 100 ml
+...
+```
 ### Add a recipe
 
 ```bash
