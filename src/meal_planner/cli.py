@@ -172,7 +172,7 @@ def weekly_plan() -> None:
     shopping_list = build_shopping_list(plan)
     display_shopping_list(shopping_list)
 
-    owned_ingredients = ask_owned_ingredients()
+    owned_ingredients = ask_owned_ingredients(shopping_list)
 
     if owned_ingredients:
         still_to_buy = subtract_owned_ingredients(shopping_list, owned_ingredients)

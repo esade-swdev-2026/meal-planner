@@ -4,6 +4,7 @@ import typer
 
 from meal_planner.logic import filter_by_calories
 from meal_planner.recipes import Recipe
+from meal_planner.shopping_list import can_subtract, parse_quantity
 from meal_planner.weekly_planner import (
     DAYS,
     find_alternatives,
@@ -111,12 +112,48 @@ def display_shopping_list(shopping_list: dict[str, str], title: str = "SHOPPING 
         typer.echo(f"- {ingredient}: {quantity}")
 
 
-def ask_owned_ingredients() -> dict[str, str]:
+def ask_owned_ingredients(shopping_list: dict[str, str]) -> dict[str, str]:
     if not typer.confirm("\nDo you already have some of these ingredients?", default=False):
         return {}
 
-    typer.echo("Use the same units as the shopping list, for example g, ml or slices.")
-    return ask_ingredients()
+    typer.echo("Enter what you already have. Leave the name empty to finish.")
+    owned: dict[str, str] = {}
+
+    while True:
+        ingredient = typer.prompt("Ingredient", default="", show_default=False).strip().lower()
+
+        if ingredient == "":
+            return owned
+
+        if ingredient not in shopping_list:
+            typer.echo(f"'{ingredient}' is not on your shopping list.")
+            continue
+
+        needed = shopping_list[ingredient]
+
+        if parse_quantity(needed) is None:
+            typer.echo(f"The list needs {needed} of {ingredient}, which cannot be subtracted.")
+            continue
+
+        quantity = ask_owned_quantity(ingredient, needed)
+
+        if quantity != "":
+            owned[ingredient] = quantity
+
+
+def ask_owned_quantity(ingredient: str, needed: str) -> str:
+    while True:
+        answer = typer.prompt(
+            f"How much {ingredient} do you have? The list needs {needed} (empty to skip)",
+            default="",
+            show_default=False,
+        )
+        quantity = str(answer).strip()
+
+        if quantity == "" or can_subtract(needed, quantity):
+            return quantity
+
+        typer.echo(f"'{quantity}' cannot be compared with {needed}. Use the same unit as the list.")
 
 
 def display_not_subtracted(not_subtracted: dict[str, str]) -> None:
