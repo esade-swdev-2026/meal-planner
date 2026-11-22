@@ -1,5 +1,3 @@
-from copy import copy
-
 import pytest
 from typer.testing import CliRunner
 
@@ -15,19 +13,22 @@ from meal_planner.recipes import Recipe
 runner = CliRunner()
 
 
-# CLI tests: check the commands and their output.
-
-
 @pytest.mark.parametrize(
     ("recipes", "expected_count"),
     [
-        (["Recipe A", "Recipe B"], 2),
+        (
+            [
+                Recipe("Recipe A", {"bread": "1 slice"}, 5, 100, ["Toast"]),
+                Recipe("Recipe B", {"eggs": "2"}, 5, 200, ["Fry"]),
+            ],
+            2,
+        ),
         ([], 0),
     ],
 )
 def test_count_recipes(
     monkeypatch: pytest.MonkeyPatch,
-    recipes: list[str],
+    recipes: list[Recipe],
     expected_count: int,
 ) -> None:
     monkeypatch.setattr(
@@ -61,9 +62,6 @@ def test_cli_filter_by_ingredient() -> None:
     assert "Avocado Toast" in result.stdout
 
 
-# Shared data for the pure-function tests.
-
-
 @pytest.fixture
 def sample_recipes() -> list[Recipe]:
     return [
@@ -82,9 +80,6 @@ def sample_recipes() -> list[Recipe]:
             steps=["Boil the pasta"],
         ),
     ]
-
-
-# Ingredient filtering tests.
 
 
 def test_ingredient_filter_on_empty_list() -> None:
@@ -115,9 +110,6 @@ def test_ingredient_filter_ignores_input_case(
     assert result == [sample_recipes[0]]
 
 
-# Cooking-time filtering tests.
-
-
 def test_time_filter_on_empty_list() -> None:
     assert filter_by_time([], 20) == []
 
@@ -140,9 +132,6 @@ def test_time_filter_respects_limit(
     result = filter_by_time(sample_recipes, maximum)
 
     assert [recipe.name for recipe in result] == expected_names
-
-
-# Calorie filtering tests.
 
 
 def test_calorie_filter_on_empty_list() -> None:
@@ -193,7 +182,7 @@ def test_find_fastest_recipe_returns_first_on_tie(
     sample_recipes: list[Recipe],
 ) -> None:
     first = sample_recipes[0]
-    twin = copy(first)  # same cooking time as first
+    twin = Recipe("Twin", first.ingredients, first.cooking_time, first.calories, first.steps)
 
     assert find_fastest_recipe([first, twin]) is first
     assert find_fastest_recipe([twin, first]) is twin
@@ -206,3 +195,64 @@ def test_fastest_meal_with_no_recipes(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert result.exit_code == 0
     assert result.stdout.strip() == "No recipes available."
+
+
+@pytest.mark.parametrize(
+    ("search", "expected"),
+    [
+        (" Eggs ", ["Omelette"]),
+        ("egg", ["Omelette"]),
+        ("tomato", ["Pasta"]),
+        ("chicken", ["Chicken Salad"]),
+        ("olive oil", ["Pasta", "Chicken Salad"]),
+        ("oil", ["Pasta", "Chicken Salad"]),
+        ("pea", []),
+        ("   ", []),
+    ],
+)
+def test_ingredient_search_matches_the_start_of_a_word(search: str, expected: list[str]) -> None:
+    recipes = [
+        Recipe("Omelette", {"eggs": "3"}, 10, 300, ["Fry"]),
+        Recipe("Pasta", {"cherry tomatoes": "200 g", "olive oil": "10 ml"}, 15, 500, ["Boil"]),
+        Recipe("Chicken Salad", {"chicken breast": "150 g", "olive oil": "5 ml"}, 20, 400, ["Mix"]),
+        Recipe("Hummus", {"chickpeas": "400 g"}, 10, 350, ["Blend"]),
+    ]
+
+    found = filter_by_ingredient(recipes, search)
+
+    assert [recipe.name for recipe in found] == expected
+
+
+def test_ingredient_search_ignores_case_of_saved_names() -> None:
+    recipes = [Recipe("Chicken Salad", {"Chicken Breast": "150 g"}, 20, 400, ["Mix"])]
+
+    found = filter_by_ingredient(recipes, "chicken")
+
+    assert [recipe.name for recipe in found] == ["Chicken Salad"]
+
+
+def test_show_with_no_recipes(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("meal_planner.cli.load_recipes_or_exit", lambda: [])
+
+    result = runner.invoke(app, ["show"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == "No recipes available."
+
+
+def test_weekly_plan_with_no_recipes(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("meal_planner.cli.load_recipes_or_exit", lambda: [])
+
+    result = runner.invoke(app, ["weekly-plan"])
+
+    assert result.exit_code == 1
+    assert "No recipes are available." in result.output
+    assert "CREATE YOUR WEEKLY PLAN" not in result.output
+
+
+def test_help_describes_every_command_without_completion_options() -> None:
+    result = runner.invoke(app, ["--help"])
+
+    assert result.exit_code == 0
+    assert "Suggest a random recipe" in result.stdout
+    assert "--install-completion" not in result.stdout

@@ -26,7 +26,7 @@ def find_suitable_recipes(
 
 def create_weekly_plan(daily_options: list[list[Recipe]]) -> list[Recipe]:
     if len(daily_options) != len(DAYS):
-        raise ValueError("Provide recipe options for all seven days.")
+        raise ValueError(f"Provide recipe options for all {len(DAYS)} days.")
 
     if any(not options for options in daily_options):
         raise ValueError("Every day must have at least one suitable recipe.")

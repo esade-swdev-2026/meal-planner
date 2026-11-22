@@ -4,6 +4,7 @@ import typer
 
 from meal_planner.ingredient_matching import find_cookable_recipes
 from meal_planner.logic import (
+    add_recipe_to_list,
     create_recipe,
     filter_by_calories,
     filter_by_ingredient,
@@ -22,12 +23,12 @@ from meal_planner.prompts import (
     display_weekly_plan,
     edit_weekly_plan,
 )
-from meal_planner.recipes import DATA_FILE, Recipe, add_recipe, ensure_data_file, load_recipes
+from meal_planner.recipes import DATA_FILE, Recipe, ensure_data_file, load_recipes, save_recipes
 from meal_planner.shopping_list import build_shopping_list, subtract_owned_ingredients
 from meal_planner.surprise import choose_surprise_meal
 from meal_planner.weekly_planner import create_weekly_plan
 
-app = typer.Typer(help="Meal planner command-line application.")
+app = typer.Typer(help="Meal planner command-line application.", add_completion=False)
 
 
 def exit_with_error(message: str) -> NoReturn:
@@ -48,6 +49,10 @@ def load_recipes_or_exit() -> list[Recipe]:
 def show() -> None:
     """Show all available meals."""
     recipes = load_recipes_or_exit()
+
+    if not recipes:
+        typer.echo("No recipes available.")
+        return
 
     for recipe in recipes:
         typer.echo(f"\n{recipe.name}")
@@ -126,7 +131,10 @@ def add_recipe_command() -> None:
             steps,
             oven_temperature,
         )
-        add_recipe(recipe, ensure_data_file(DATA_FILE))
+        path = ensure_data_file(DATA_FILE)
+        recipes = load_recipes(path)
+        updated_recipes = add_recipe_to_list(recipes, recipe)
+        save_recipes(updated_recipes, path)
     except ValueError as error:
         exit_with_error(str(error))
     except OSError as error:
@@ -140,14 +148,14 @@ def weekly_plan() -> None:
     """Create a weekly plan, optionally replace meals, and show the shopping list."""
     available_recipes = load_recipes_or_exit()
 
+    if not available_recipes:
+        exit_with_error("No recipes are available.")
+
     typer.echo("\nCREATE YOUR WEEKLY PLAN")
     typer.echo("We will plan one meal per day.")
     typer.echo("The calorie maximum applies to each planned meal.")
 
     try:
-        if not available_recipes:
-            raise ValueError("No recipes are available.")
-
         maximum_calories = ask_positive_integer("Maximum calories per planned meal")
         daily_options = ask_daily_options(available_recipes, maximum_calories)
 
@@ -174,6 +182,7 @@ def weekly_plan() -> None:
 
 @app.command()
 def surprise_me() -> None:
+    """Suggest a random recipe you can cook with the ingredients you have."""
     recipes = load_recipes_or_exit()
     typer.echo("\nSURPRISE ME")
     answer = typer.prompt("Ingredients you have (separated by commas)")
