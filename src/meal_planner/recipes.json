@@ -141,7 +141,7 @@
         "name": "Pan con Tomate",
         "ingredients": {
             "bread": "2 slices",
-            "tomatoes": "1",
+            "tomatoes": "120 g",
             "garlic": "1 clove",
             "olive oil": "10 ml",
             "salt": "1 g"
@@ -378,8 +378,8 @@
         "name": "Guacamole",
         "ingredients": {
             "avocado": "2",
-            "tomatoes": "1",
-            "onion": "1/2",
+            "tomatoes": "120 g",
+            "onion": "0.5",
             "lime": "1",
             "salt": "1 g"
         },
@@ -399,7 +399,7 @@
             "pasta": "150 g",
             "tuna": "1 can",
             "sweetcorn": "50 g",
-            "tomatoes": "1",
+            "tomatoes": "120 g",
             "mayonnaise": "30 g"
         },
         "cooking_time": 15,
@@ -415,7 +415,7 @@
     {
         "name": "Baked Potato",
         "ingredients": {
-            "potatoes": "1 large",
+            "potatoes": "300 g",
             "butter": "15 g",
             "cheese": "30 g",
             "salt": "1 g"

@@ -227,3 +227,22 @@ def choose_recipe_from_list(alternatives: list[Recipe]) -> Recipe:
             return alternatives[choice - 1]
 
         typer.echo("Please choose one of the displayed meal numbers.")
+
+
+def display_recipe(recipe: Recipe) -> None:
+    typer.echo(f"\n{recipe.name.upper()}")
+    typer.echo(f"Cooking time: {recipe.cooking_time} minutes")
+    typer.echo(f"Calories: {recipe.calories}")
+
+    if recipe.oven_temperature is not None:
+        typer.echo(f"Oven temperature: {recipe.oven_temperature}°C")
+
+    typer.echo("\nIngredients:")
+
+    for ingredient, quantity in recipe.ingredients.items():
+        typer.echo(f"- {ingredient}: {quantity}")
+
+    typer.echo("\nSteps:")
+
+    for number, step in enumerate(recipe.steps, start=1):
+        typer.echo(f"{number}. {step}")
