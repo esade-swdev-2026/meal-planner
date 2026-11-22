@@ -1,17 +1,24 @@
 from meal_planner.recipes import Recipe
 
 
+def starts_a_word(ingredient_name: str, search: str) -> bool:
+    return f" {search}" in f" {ingredient_name.lower()}"
+
+
 def filter_by_ingredient(
     recipes: list[Recipe],
     ingredient: str,
 ) -> list[Recipe]:
-    matching_recipes: list[Recipe] = []
+    search = ingredient.strip().lower()
 
-    for recipe in recipes:
-        if ingredient.lower() in recipe.ingredients:
-            matching_recipes.append(recipe)
+    if not search:
+        return []
 
-    return matching_recipes
+    return [
+        recipe
+        for recipe in recipes
+        if any(starts_a_word(name, search) for name in recipe.ingredients)
+    ]
 
 
 def filter_by_time(
@@ -91,3 +98,13 @@ def find_fastest_recipe(recipes: list[Recipe]) -> Recipe | None:
     if not recipes:
         return None
     return min(recipes, key=lambda recipe: recipe.cooking_time)
+
+
+def find_recipe_by_name(recipes: list[Recipe], name: str) -> Recipe | None:
+    search = name.strip().lower()
+
+    for recipe in recipes:
+        if recipe.name.lower() == search:
+            return recipe
+
+    return None

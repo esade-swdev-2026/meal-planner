@@ -1,14 +1,16 @@
-from typing import NoReturn
+from typing import Annotated, NoReturn
 
 import typer
 
 from meal_planner.ingredient_matching import find_cookable_recipes
 from meal_planner.logic import (
+    add_recipe_to_list,
     create_recipe,
     filter_by_calories,
     filter_by_ingredient,
     filter_by_time,
     find_fastest_recipe,
+    find_recipe_by_name,
 )
 from meal_planner.prompts import (
     ask_daily_options,
@@ -17,17 +19,19 @@ from meal_planner.prompts import (
     ask_owned_ingredients,
     ask_positive_integer,
     ask_steps,
+    choose_recipe_from_list,
     display_not_subtracted,
+    display_recipe,
     display_shopping_list,
     display_weekly_plan,
     edit_weekly_plan,
 )
-from meal_planner.recipes import DATA_FILE, Recipe, add_recipe, ensure_data_file, load_recipes
+from meal_planner.recipes import DATA_FILE, Recipe, ensure_data_file, load_recipes, save_recipes
 from meal_planner.shopping_list import build_shopping_list, subtract_owned_ingredients
 from meal_planner.surprise import choose_surprise_meal
 from meal_planner.weekly_planner import create_weekly_plan
 
-app = typer.Typer(help="Meal planner command-line application.")
+app = typer.Typer(help="Meal planner command-line application.", add_completion=False)
 
 
 def exit_with_error(message: str) -> NoReturn:
@@ -48,6 +52,10 @@ def load_recipes_or_exit() -> list[Recipe]:
 def show() -> None:
     """Show all available meals."""
     recipes = load_recipes_or_exit()
+
+    if not recipes:
+        typer.echo("No recipes available.")
+        return
 
     for recipe in recipes:
         typer.echo(f"\n{recipe.name}")
@@ -126,7 +134,10 @@ def add_recipe_command() -> None:
             steps,
             oven_temperature,
         )
-        add_recipe(recipe, ensure_data_file(DATA_FILE))
+        path = ensure_data_file(DATA_FILE)
+        recipes = load_recipes(path)
+        updated_recipes = add_recipe_to_list(recipes, recipe)
+        save_recipes(updated_recipes, path)
     except ValueError as error:
         exit_with_error(str(error))
     except OSError as error:
@@ -140,14 +151,14 @@ def weekly_plan() -> None:
     """Create a weekly plan, optionally replace meals, and show the shopping list."""
     available_recipes = load_recipes_or_exit()
 
+    if not available_recipes:
+        exit_with_error("No recipes are available.")
+
     typer.echo("\nCREATE YOUR WEEKLY PLAN")
     typer.echo("We will plan one meal per day.")
     typer.echo("The calorie maximum applies to each planned meal.")
 
     try:
-        if not available_recipes:
-            raise ValueError("No recipes are available.")
-
         maximum_calories = ask_positive_integer("Maximum calories per planned meal")
         daily_options = ask_daily_options(available_recipes, maximum_calories)
 
@@ -164,16 +175,17 @@ def weekly_plan() -> None:
     shopping_list = build_shopping_list(plan)
     display_shopping_list(shopping_list)
 
-    owned_ingredients = ask_owned_ingredients()
+    owned_ingredients = ask_owned_ingredients(shopping_list)
 
     if owned_ingredients:
-        still_to_buy, not_subtracted = subtract_owned_ingredients(shopping_list, owned_ingredients)
-        display_shopping_list(still_to_buy, title="STILL TO BUY")
-        display_not_subtracted(not_subtracted)
+        still_to_buy = subtract_owned_ingredients(shopping_list, owned_ingredients)
+        display_shopping_list(still_to_buy.shopping_list, title="STILL TO BUY")
+        display_not_subtracted(still_to_buy.not_subtracted)
 
 
 @app.command()
 def surprise_me() -> None:
+    """Suggest a random recipe you can cook with the ingredients you have."""
     recipes = load_recipes_or_exit()
     typer.echo("\nSURPRISE ME")
     answer = typer.prompt("Ingredients you have (separated by commas)")
@@ -201,6 +213,33 @@ def fastest_meal() -> None:
         return
 
     typer.echo(f"{recipe.name} ({recipe.cooking_time} min)")
+
+
+@app.command("recipe")
+def show_recipe(
+    name: Annotated[
+        str, typer.Argument(help="The recipe's name. Leave it out to choose from a list.")
+    ] = "",
+) -> None:
+    """Show a recipe's ingredients and the steps to cook it."""
+    recipes = load_recipes_or_exit()
+
+    if not recipes:
+        typer.echo("No recipes available.")
+        return
+
+    if name.strip() == "":
+        display_recipe(choose_recipe_from_list(recipes))
+        return
+
+    recipe = find_recipe_by_name(recipes, name)
+
+    if recipe is None:
+        exit_with_error(
+            f"no recipe called '{name.strip()}'. Run 'meal-planner recipe' to see them all."
+        )
+
+    display_recipe(recipe)
 
 
 if __name__ == "__main__":
