@@ -1,10 +1,25 @@
+from dataclasses import dataclass
+
 from meal_planner.recipes import Recipe
 
+
+@dataclass(frozen=True)
+class Quantity:
+    amount: float
+    unit: str
+
+
+@dataclass(frozen=True)
+class StillToBuy:
+    shopping_list: dict[str, str]
+    not_subtracted: dict[str, str]
+
+
 MEASURED_UNITS = {
-    "g": ("g", 1),
-    "kg": ("g", 1000),
-    "ml": ("ml", 1),
-    "l": ("ml", 1000),
+    "g": Quantity(1, "g"),
+    "kg": Quantity(1000, "g"),
+    "ml": Quantity(1, "ml"),
+    "l": Quantity(1000, "ml"),
 }
 
 PLURAL_UNITS = {
@@ -28,7 +43,7 @@ def to_singular(unit: str) -> str:
     return SINGULAR_UNITS.get(unit, unit)
 
 
-def parse_quantity(quantity: str) -> tuple[float, str] | None:
+def parse_quantity(quantity: str) -> Quantity | None:
     parts = quantity.lower().split()
 
     if not parts or not parts[0].replace(".", "", 1).isdigit():
@@ -38,16 +53,17 @@ def parse_quantity(quantity: str) -> tuple[float, str] | None:
     unit = " ".join(parts[1:])
 
     if unit in MEASURED_UNITS:
-        base_unit, factor = MEASURED_UNITS[unit]
-        return amount * factor, base_unit
+        one_unit = MEASURED_UNITS[unit]
+        return Quantity(amount * one_unit.amount, one_unit.unit)
 
-    return amount, to_singular(unit)
+    return Quantity(amount, to_singular(unit))
 
 
-def format_quantity(amount: float, unit: str) -> str:
+def format_quantity(quantity: Quantity) -> str:
+    amount = quantity.amount
     number = str(int(amount)) if amount.is_integer() else str(round(amount, 2))
 
-    unit = to_singular(unit)
+    unit = to_singular(quantity.unit)
     if amount != 1:
         unit = PLURAL_UNITS.get(unit, unit)
 
@@ -67,14 +83,13 @@ def combine_quantities(quantities: list[str]) -> str:
         if parsed is None:
             return " + ".join(quantities)
 
-        amount, unit = parsed
-        total += amount
-        units.append(unit)
+        total += parsed.amount
+        units.append(parsed.unit)
 
     if len(set(units)) != 1:
         return " + ".join(quantities)
 
-    return format_quantity(total, units[0])
+    return format_quantity(Quantity(total, units[0]))
 
 
 def build_shopping_list(plan: list[Recipe]) -> dict[str, str]:
@@ -97,7 +112,7 @@ def build_shopping_list(plan: list[Recipe]) -> dict[str, str]:
 def subtract_owned_ingredients(
     shopping_list: dict[str, str],
     owned_ingredients: dict[str, str],
-) -> tuple[dict[str, str], dict[str, str]]:
+) -> StillToBuy:
     owned = {name.strip().lower(): quantity for name, quantity in owned_ingredients.items()}
     still_to_buy: dict[str, str] = {}
     not_subtracted: dict[str, str] = {}
@@ -110,16 +125,14 @@ def subtract_owned_ingredients(
         needed = parse_quantity(needed_quantity)
         have = parse_quantity(owned[ingredient])
 
-        if needed is None or have is None or needed[1] != have[1]:
+        if needed is None or have is None or needed.unit != have.unit:
             still_to_buy[ingredient] = needed_quantity
             not_subtracted[ingredient] = owned[ingredient]
             continue
 
-        needed_amount, unit = needed
-        have_amount, _ = have
-        remaining = needed_amount - have_amount
+        remaining = needed.amount - have.amount
 
         if remaining > 0:
-            still_to_buy[ingredient] = format_quantity(remaining, unit)
+            still_to_buy[ingredient] = format_quantity(Quantity(remaining, needed.unit))
 
-    return still_to_buy, not_subtracted
+    return StillToBuy(shopping_list=still_to_buy, not_subtracted=not_subtracted)
