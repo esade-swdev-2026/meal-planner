@@ -6,6 +6,7 @@ from meal_planner.recipes import Recipe
 from meal_planner.shopping_list import (
     Quantity,
     build_shopping_list,
+    can_subtract,
     combine_quantities,
     format_quantity,
     parse_quantity,
@@ -30,6 +31,10 @@ def weekly_plan_answers(owned: str) -> str:
     minutes_for_each_day = "10\n" * 7
     keep_the_plan = "n\n"
     return calories + minutes_for_each_day + keep_the_plan + owned
+
+
+def test_parse_quantity_rejects_mixed_quantities() -> None:
+    assert parse_quantity("500 g + 1") is None
 
 
 def test_parse_quantity_splits_number_and_unit() -> None:
@@ -121,6 +126,23 @@ def test_empty_plan_gives_empty_shopping_list() -> None:
     assert build_shopping_list([]) == {}
 
 
+@pytest.mark.parametrize(
+    ("needed", "owned", "expected"),
+    [
+        ("500 g", "200 g", True),
+        ("500 g", "1 kg", True),
+        ("1000 ml", "0.5 l", True),
+        ("4 slices", "1 slice", True),
+        ("500 g", "3", False),
+        ("70 ml", "1 can", False),
+        ("1/2 + 1/2", "1", False),
+        ("500 g", "", False),
+    ],
+)
+def test_can_subtract_only_comparable_quantities(needed: str, owned: str, expected: bool) -> None:
+    assert can_subtract(needed, owned) is expected
+
+
 def test_owned_amount_is_subtracted() -> None:
     result = subtract_owned_ingredients({"pasta": "500 g"}, {"pasta": "200 g"})
 
@@ -201,21 +223,62 @@ def test_cli_weekly_plan_subtracts_what_the_user_has(
     result = runner.invoke(app, ["weekly-plan"], input=weekly_plan_answers(owned))
 
     assert result.exit_code == 0
-    assert "Use the same units as the shopping list" in result.stdout
     still_to_buy = result.stdout.split("STILL TO BUY")[1]
     assert "- olive oil: 20 ml" in still_to_buy
     assert "- bread: 10 slices" in still_to_buy
 
 
-def test_cli_weekly_plan_warns_when_it_cannot_subtract(
+def test_cli_weekly_plan_asks_again_for_a_quantity_in_the_wrong_unit(
     toast: Recipe, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr("meal_planner.cli.load_recipes_or_exit", lambda: [toast])
-    owned = "y\nolive oil\n1 can\n\n"
+    owned = "y\nolive oil\n1 can\n0.05 l\n\n"
+
+    result = runner.invoke(app, ["weekly-plan"], input=weekly_plan_answers(owned))
+
+    assert result.exit_code == 0
+    assert "'1 can' cannot be compared with 70 ml" in result.stdout
+    still_to_buy = result.stdout.split("STILL TO BUY")[1]
+    assert "- olive oil: 20 ml" in still_to_buy
+
+
+def test_cli_weekly_plan_asks_again_for_an_ingredient_not_on_the_list(
+    toast: Recipe, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("meal_planner.cli.load_recipes_or_exit", lambda: [toast])
+    owned = "y\nmilk\nolive oil\n50 ml\n\n"
+
+    result = runner.invoke(app, ["weekly-plan"], input=weekly_plan_answers(owned))
+
+    assert result.exit_code == 0
+    assert "'milk' is not on your shopping list." in result.stdout
+    assert "- olive oil: 20 ml" in result.stdout.split("STILL TO BUY")[1]
+
+
+def test_cli_weekly_plan_skips_an_ingredient_with_an_empty_quantity(
+    toast: Recipe, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("meal_planner.cli.load_recipes_or_exit", lambda: [toast])
+    owned = "y\nolive oil\n\nbread\n2 slices\n\n"
 
     result = runner.invoke(app, ["weekly-plan"], input=weekly_plan_answers(owned))
 
     assert result.exit_code == 0
     still_to_buy = result.stdout.split("STILL TO BUY")[1]
     assert "- olive oil: 70 ml" in still_to_buy
-    assert "Could not subtract olive oil (1 can)" in still_to_buy
+    assert "- bread: 12 slices" in still_to_buy
+
+
+def test_cli_weekly_plan_explains_a_quantity_that_cannot_be_subtracted(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    guacamole = Recipe("Guacamole", {"onion": "1/2", "avocado": "2"}, 10, 250, ["Mash"])
+    monkeypatch.setattr("meal_planner.cli.load_recipes_or_exit", lambda: [guacamole])
+    owned = "y\nonion\navocado\n4\n\n"
+
+    result = runner.invoke(app, ["weekly-plan"], input=weekly_plan_answers(owned))
+
+    assert result.exit_code == 0
+    assert "of onion, which cannot be subtracted" in result.stdout
+    still_to_buy = result.stdout.split("STILL TO BUY")[1]
+    assert "- avocado: 10" in still_to_buy

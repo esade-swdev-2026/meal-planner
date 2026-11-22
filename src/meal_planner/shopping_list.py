@@ -44,6 +44,9 @@ def to_singular(unit: str) -> str:
 
 
 def parse_quantity(quantity: str) -> Quantity | None:
+    if "+" in quantity:
+        return None
+
     parts = quantity.lower().split()
 
     if not parts or not parts[0].replace(".", "", 1).isdigit():
@@ -107,6 +110,13 @@ def build_shopping_list(plan: list[Recipe]) -> dict[str, str]:
         shopping_list[ingredient] = combine_quantities(quantities[ingredient])
 
     return shopping_list
+
+
+def can_subtract(needed_quantity: str, owned_quantity: str) -> bool:
+    needed = parse_quantity(needed_quantity)
+    owned = parse_quantity(owned_quantity)
+
+    return needed is not None and owned is not None and needed.unit == owned.unit
 
 
 def subtract_owned_ingredients(
