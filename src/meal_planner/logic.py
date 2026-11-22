@@ -98,3 +98,13 @@ def find_fastest_recipe(recipes: list[Recipe]) -> Recipe | None:
     if not recipes:
         return None
     return min(recipes, key=lambda recipe: recipe.cooking_time)
+
+
+def find_recipe_by_name(recipes: list[Recipe], name: str) -> Recipe | None:
+    search = name.strip().lower()
+
+    for recipe in recipes:
+        if recipe.name.lower() == search:
+            return recipe
+
+    return None

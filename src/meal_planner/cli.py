@@ -1,4 +1,4 @@
-from typing import NoReturn
+from typing import Annotated, NoReturn
 
 import typer
 
@@ -10,6 +10,7 @@ from meal_planner.logic import (
     filter_by_ingredient,
     filter_by_time,
     find_fastest_recipe,
+    find_recipe_by_name,
 )
 from meal_planner.prompts import (
     ask_daily_options,
@@ -18,7 +19,9 @@ from meal_planner.prompts import (
     ask_owned_ingredients,
     ask_positive_integer,
     ask_steps,
+    choose_recipe_from_list,
     display_not_subtracted,
+    display_recipe,
     display_shopping_list,
     display_weekly_plan,
     edit_weekly_plan,
@@ -210,6 +213,33 @@ def fastest_meal() -> None:
         return
 
     typer.echo(f"{recipe.name} ({recipe.cooking_time} min)")
+
+
+@app.command("recipe")
+def show_recipe(
+    name: Annotated[
+        str, typer.Argument(help="The recipe's name. Leave it out to choose from a list.")
+    ] = "",
+) -> None:
+    """Show a recipe's ingredients and the steps to cook it."""
+    recipes = load_recipes_or_exit()
+
+    if not recipes:
+        typer.echo("No recipes available.")
+        return
+
+    if name.strip() == "":
+        display_recipe(choose_recipe_from_list(recipes))
+        return
+
+    recipe = find_recipe_by_name(recipes, name)
+
+    if recipe is None:
+        exit_with_error(
+            f"no recipe called '{name.strip()}'. Run 'meal-planner recipe' to see them all."
+        )
+
+    display_recipe(recipe)
 
 
 if __name__ == "__main__":
