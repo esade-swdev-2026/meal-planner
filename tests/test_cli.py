@@ -223,6 +223,14 @@ def test_ingredient_search_matches_the_start_of_a_word(search: str, expected: li
     assert [recipe.name for recipe in found] == expected
 
 
+def test_ingredient_search_ignores_case_of_saved_names() -> None:
+    recipes = [Recipe("Chicken Salad", {"Chicken Breast": "150 g"}, 20, 400, ["Mix"])]
+
+    found = filter_by_ingredient(recipes, "chicken")
+
+    assert [recipe.name for recipe in found] == ["Chicken Salad"]
+
+
 def test_show_with_no_recipes(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("meal_planner.cli.load_recipes_or_exit", lambda: [])
 

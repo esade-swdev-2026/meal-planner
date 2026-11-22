@@ -2,7 +2,7 @@ from meal_planner.recipes import Recipe
 
 
 def starts_a_word(ingredient_name: str, search: str) -> bool:
-    return f" {search}" in f" {ingredient_name}"
+    return f" {search}" in f" {ingredient_name.lower()}"
 
 
 def filter_by_ingredient(

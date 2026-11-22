@@ -132,7 +132,9 @@ def add_recipe_command() -> None:
             oven_temperature,
         )
         path = ensure_data_file(DATA_FILE)
-        save_recipes(add_recipe_to_list(load_recipes(path), recipe), path)
+        recipes = load_recipes(path)
+        updated_recipes = add_recipe_to_list(recipes, recipe)
+        save_recipes(updated_recipes, path)
     except ValueError as error:
         exit_with_error(str(error))
     except OSError as error:
