@@ -219,4 +219,3 @@ def test_cli_weekly_plan_warns_when_it_cannot_subtract(
     still_to_buy = result.stdout.split("STILL TO BUY")[1]
     assert "- olive oil: 70 ml" in still_to_buy
     assert "Could not subtract olive oil (1 can)" in still_to_buy
-
