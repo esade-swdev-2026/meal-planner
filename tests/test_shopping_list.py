@@ -4,6 +4,7 @@ from typer.testing import CliRunner
 from meal_planner.cli import app
 from meal_planner.recipes import Recipe
 from meal_planner.shopping_list import (
+    Quantity,
     build_shopping_list,
     combine_quantities,
     format_quantity,
@@ -32,18 +33,18 @@ def weekly_plan_answers(owned: str) -> str:
 
 
 def test_parse_quantity_splits_number_and_unit() -> None:
-    assert parse_quantity("200 g") == (200, "g")
-    assert parse_quantity("2") == (2, "")
+    assert parse_quantity("200 g") == Quantity(200, "g")
+    assert parse_quantity("2") == Quantity(2, "")
 
 
 def test_parse_quantity_converts_kilograms_and_litres() -> None:
-    assert parse_quantity("1 kg") == (1000, "g")
-    assert parse_quantity("0.5 l") == (500, "ml")
+    assert parse_quantity("1 kg") == Quantity(1000, "g")
+    assert parse_quantity("0.5 l") == Quantity(500, "ml")
 
 
 def test_parse_quantity_makes_word_units_singular() -> None:
-    assert parse_quantity("3 cloves") == (3, "clove")
-    assert parse_quantity("1 clove") == (1, "clove")
+    assert parse_quantity("3 cloves") == Quantity(3, "clove")
+    assert parse_quantity("1 clove") == Quantity(1, "clove")
 
 
 def test_parse_quantity_refuses_what_cannot_be_read() -> None:
@@ -54,10 +55,10 @@ def test_parse_quantity_refuses_what_cannot_be_read() -> None:
 
 
 def test_format_quantity_writes_plural_word_units() -> None:
-    assert format_quantity(4, "slice") == "4 slices"
-    assert format_quantity(1, "clove") == "1 clove"
-    assert format_quantity(2, "large") == "2 large"
-    assert format_quantity(1.5, "g") == "1.5 g"
+    assert format_quantity(Quantity(4, "slice")) == "4 slices"
+    assert format_quantity(Quantity(1, "clove")) == "1 clove"
+    assert format_quantity(Quantity(2, "large")) == "2 large"
+    assert format_quantity(Quantity(1.5, "g")) == "1.5 g"
 
 
 def test_quantities_with_the_same_unit_are_added() -> None:
@@ -121,66 +122,60 @@ def test_empty_plan_gives_empty_shopping_list() -> None:
 
 
 def test_owned_amount_is_subtracted() -> None:
-    still_to_buy, not_subtracted = subtract_owned_ingredients(
-        {"pasta": "500 g"}, {"pasta": "200 g"}
-    )
+    result = subtract_owned_ingredients({"pasta": "500 g"}, {"pasta": "200 g"})
 
-    assert still_to_buy == {"pasta": "300 g"}
-    assert not_subtracted == {}
+    assert result.shopping_list == {"pasta": "300 g"}
+    assert result.not_subtracted == {}
 
 
 def test_owned_amount_in_other_unit_is_converted() -> None:
-    still_to_buy, _ = subtract_owned_ingredients(
+    result = subtract_owned_ingredients(
         {"pasta": "500 g", "milk": "1000 ml"},
         {"pasta": "1 kg", "milk": "0.5 l"},
     )
 
-    assert still_to_buy == {"milk": "500 ml"}
+    assert result.shopping_list == {"milk": "500 ml"}
 
 
 def test_word_units_are_subtracted() -> None:
-    still_to_buy, _ = subtract_owned_ingredients(
+    result = subtract_owned_ingredients(
         {"bread": "4 slices", "garlic": "3 cloves"},
         {"bread": "4 slices", "garlic": "1 clove"},
     )
 
-    assert still_to_buy == {"garlic": "2 cloves"}
+    assert result.shopping_list == {"garlic": "2 cloves"}
 
 
 def test_plain_counts_are_subtracted() -> None:
-    still_to_buy, _ = subtract_owned_ingredients({"eggs": "6"}, {"eggs": "2"})
+    result = subtract_owned_ingredients({"eggs": "6"}, {"eggs": "2"})
 
-    assert still_to_buy == {"eggs": "4"}
+    assert result.shopping_list == {"eggs": "4"}
 
 
 def test_ingredients_not_owned_stay_on_the_list() -> None:
-    still_to_buy, _ = subtract_owned_ingredients(
-        {"pasta": "500 g", "salt": "5 g"}, {"pasta": "200 g"}
-    )
+    result = subtract_owned_ingredients({"pasta": "500 g", "salt": "5 g"}, {"pasta": "200 g"})
 
-    assert still_to_buy == {"pasta": "300 g", "salt": "5 g"}
+    assert result.shopping_list == {"pasta": "300 g", "salt": "5 g"}
 
 
 def test_different_units_are_kept_and_reported() -> None:
-    still_to_buy, not_subtracted = subtract_owned_ingredients(
-        {"tomatoes": "500 g"}, {"tomatoes": "3"}
-    )
+    result = subtract_owned_ingredients({"tomatoes": "500 g"}, {"tomatoes": "3"})
 
-    assert still_to_buy == {"tomatoes": "500 g"}
-    assert not_subtracted == {"tomatoes": "3"}
+    assert result.shopping_list == {"tomatoes": "500 g"}
+    assert result.not_subtracted == {"tomatoes": "3"}
 
 
 def test_quantities_that_cannot_be_read_are_kept_and_reported() -> None:
-    still_to_buy, not_subtracted = subtract_owned_ingredients({"onion": "1/2"}, {"onion": "1"})
+    result = subtract_owned_ingredients({"onion": "1/2"}, {"onion": "1"})
 
-    assert still_to_buy == {"onion": "1/2"}
-    assert not_subtracted == {"onion": "1"}
+    assert result.shopping_list == {"onion": "1/2"}
+    assert result.not_subtracted == {"onion": "1"}
 
 
 def test_owned_names_ignore_case_and_spaces() -> None:
-    still_to_buy, _ = subtract_owned_ingredients({"olive oil": "70 ml"}, {" Olive Oil ": "50 ml"})
+    result = subtract_owned_ingredients({"olive oil": "70 ml"}, {" Olive Oil ": "50 ml"})
 
-    assert still_to_buy == {"olive oil": "20 ml"}
+    assert result.shopping_list == {"olive oil": "20 ml"}
 
 
 def test_cli_weekly_plan_shows_the_shopping_list(
@@ -224,3 +219,4 @@ def test_cli_weekly_plan_warns_when_it_cannot_subtract(
     still_to_buy = result.stdout.split("STILL TO BUY")[1]
     assert "- olive oil: 70 ml" in still_to_buy
     assert "Could not subtract olive oil (1 can)" in still_to_buy
+

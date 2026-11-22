@@ -167,9 +167,9 @@ def weekly_plan() -> None:
     owned_ingredients = ask_owned_ingredients()
 
     if owned_ingredients:
-        still_to_buy, not_subtracted = subtract_owned_ingredients(shopping_list, owned_ingredients)
-        display_shopping_list(still_to_buy, title="STILL TO BUY")
-        display_not_subtracted(not_subtracted)
+        still_to_buy = subtract_owned_ingredients(shopping_list, owned_ingredients)
+        display_shopping_list(still_to_buy.shopping_list, title="STILL TO BUY")
+        display_not_subtracted(still_to_buy.not_subtracted)
 
 
 @app.command()
