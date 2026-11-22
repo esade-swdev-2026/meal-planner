@@ -1,5 +1,5 @@
 import json
-import shutil
+from dataclasses import dataclass
 from pathlib import Path
 
 SEED_FILE = Path(__file__).parent / "recipes.json"
@@ -7,22 +7,14 @@ SEED_FILE = Path(__file__).parent / "recipes.json"
 DATA_FILE = Path("data") / "recipes.json"
 
 
+@dataclass
 class Recipe:
-    def __init__(
-        self,
-        name: str,
-        ingredients: dict[str, str],
-        cooking_time: int,
-        calories: int,
-        steps: list[str],
-        oven_temperature: int | None = None,
-    ) -> None:
-        self.name = name
-        self.ingredients = ingredients
-        self.cooking_time = cooking_time
-        self.calories = calories
-        self.steps = steps
-        self.oven_temperature = oven_temperature
+    name: str
+    ingredients: dict[str, str]
+    cooking_time: int
+    calories: int
+    steps: list[str]
+    oven_temperature: int | None = None
 
 
 def is_positive_whole_number(value: object) -> bool:
@@ -98,17 +90,9 @@ def save_recipes(recipes: list[Recipe], path: Path = DATA_FILE) -> None:
         json.dump(data, file, indent=4, ensure_ascii=False)
 
 
-def add_recipe(recipe: Recipe, path: Path = DATA_FILE) -> None:
-    from meal_planner.logic import add_recipe_to_list
-
-    recipes = load_recipes(path)
-    updated_recipes = add_recipe_to_list(recipes, recipe)
-    save_recipes(updated_recipes, path)
-
-
 def ensure_data_file(data_file: Path = DATA_FILE, seed_file: Path = SEED_FILE) -> Path:
     if not data_file.exists():
         data_file.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(seed_file, data_file)
+        data_file.write_text(seed_file.read_text(encoding="utf-8"), encoding="utf-8")
 
     return data_file

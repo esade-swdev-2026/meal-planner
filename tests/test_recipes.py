@@ -5,8 +5,8 @@ import pytest
 from typer.testing import CliRunner
 
 from meal_planner.cli import app
-from meal_planner.logic import create_recipe
-from meal_planner.recipes import SEED_FILE, Recipe, add_recipe, ensure_data_file, load_recipes
+from meal_planner.logic import add_recipe_to_list, create_recipe
+from meal_planner.recipes import SEED_FILE, Recipe, ensure_data_file, load_recipes, save_recipes
 
 
 def test_create_recipe_builds_recipe() -> None:
@@ -61,22 +61,20 @@ def recipes_file(tmp_path: Path) -> Path:
     return path
 
 
-def test_add_recipe_saves_to_file(recipes_file: Path) -> None:
-    soup = Recipe("Soup", {"tomatoes": "500 g"}, 30, 180, ["Simmer"])
+def test_saved_recipes_load_back_unchanged(recipes_file: Path) -> None:
+    soup = Recipe("Soup", {"tomatoes": "500 g"}, 30, 180, ["Simmer"], 180)
+    recipes = add_recipe_to_list(load_recipes(recipes_file), soup)
 
-    add_recipe(soup, recipes_file)
+    save_recipes(recipes, recipes_file)
 
-    names = [recipe.name for recipe in load_recipes(recipes_file)]
-    assert names == ["Toast", "Soup"]
+    assert load_recipes(recipes_file) == recipes
 
 
-def test_add_recipe_rejects_duplicate_name(recipes_file: Path) -> None:
+def test_add_recipe_to_list_rejects_duplicate_name(recipes_file: Path) -> None:
     duplicate = Recipe("toast", {"bread": "1 slice"}, 5, 100, ["Toast it"])
 
-    with pytest.raises(ValueError):
-        add_recipe(duplicate, recipes_file)
-
-    assert len(load_recipes(recipes_file)) == 1
+    with pytest.raises(ValueError, match="already exists"):
+        add_recipe_to_list(load_recipes(recipes_file), duplicate)
 
 
 def test_ensure_data_file_copies_seed_when_missing(tmp_path: Path, recipes_file: Path) -> None:
